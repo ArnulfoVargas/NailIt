@@ -1,0 +1,1 @@
+export 'package:tarea/models/user/user_controller.dart';

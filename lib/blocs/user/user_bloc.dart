@@ -1,6 +1,6 @@
 
 import 'package:bloc/bloc.dart';
-import 'package:tarea/controllers/controllers.dart';
+import 'package:tarea/models/models.dart';
 
 class UserBloc extends Cubit<UserController>{
   UserBloc() : super(UserController());

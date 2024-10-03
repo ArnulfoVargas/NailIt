@@ -20,7 +20,7 @@ class CustomLabeledTextbutton extends StatelessWidget {
           style: TextButton.styleFrom(
             padding: const EdgeInsets.all(0),
             minimumSize: const Size(100, 30),
-            foregroundColor: const Color(0xFF134E5E)
+            foregroundColor: const Color(0xFF229799)
           ),
           onPressed: onPressed, 
           child: Text(buttonText,

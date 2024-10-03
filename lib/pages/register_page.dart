@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
-import 'package:tarea/controllers/controllers.dart';
+import 'package:tarea/models/models.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -36,16 +36,23 @@ class _RegisterPageState extends State<RegisterPage> {
               padding: const EdgeInsets.all(25),
               child: Column(
                 children: [
-                  const SizedBox(height: 75, width: double.infinity,),
+                  const SizedBox(height: 50, width: double.infinity,),
+
+                  const Image(
+                    image: AssetImage("images/LogoNailItI.png"),
+                    color: Color(0xFF229799),
+                    height: 100,
+                  ),
                       
                   const Text("Register",
                     style: TextStyle(
-                      fontSize: 35,
-                      fontWeight: FontWeight.bold
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF424242)
                     ),
                   ),
               
-                  const SizedBox(height: 50,),
+                  const SizedBox(height: 20,),
                       
                   CustomInput(
                     onChanged: _validateUser,
@@ -132,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       
                   const SizedBox(height: 50,),
               
-                  CustomGradientButton(
+                  CustomElevatedButton(
                     onPressed: !isValidating ? _registerUser : null,
                     text: "Register",
                   ),

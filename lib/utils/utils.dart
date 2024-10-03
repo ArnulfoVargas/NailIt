@@ -48,7 +48,7 @@ class NailUtils {
           overlayColor: Colors.black12
         )
       ),
-      scaffoldBackgroundColor: const Color.fromARGB(255, 250, 250, 250)
+      scaffoldBackgroundColor: const Color(0xFFF5F5F5)
     );
   }
 

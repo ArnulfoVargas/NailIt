@@ -22,15 +22,18 @@ class _SlidablePageState extends State<SlidablePage> {
 
     return Scaffold(
       bottomNavigationBar: bottom,
-      body: PageView(
-        onPageChanged: (value) {
-          context.read<CurrentPageBloc>().setCurrentPage(value);
-        },
-        controller: controller,
-        children: const [
-          HomePage(),
-          ProfileEditPage()
-        ],
+      body: SafeArea(
+        child: PageView(
+          onPageChanged: (value) {
+            context.read<CurrentPageBloc>().setCurrentPage(value);
+          },
+          controller: controller,
+          children: const [
+            HomePage(),
+            CalendarPage(),
+            SettingsPage(),
+          ],
+        ),
       ),
     );
   }
@@ -40,12 +43,13 @@ class _SlidablePageState extends State<SlidablePage> {
       defaultIndex: currentIndex,
       icons: [
         FluidNavBarIcon(icon: Icons.home),
-        FluidNavBarIcon(icon: Icons.settings)
+        FluidNavBarIcon(icon: Icons.calendar_month),
+        FluidNavBarIcon(icon: Icons.settings, ),
       ], 
       currentIndex: currentIndex,
       animationFactor: .25,
       style: const FluidNavBarStyle(
-        iconSelectedForegroundColor: Color(0xFF2C3E50),
+        iconSelectedForegroundColor: Color(0xFF229799),
         iconUnselectedForegroundColor: Colors.black26,
       ),
       onChange: (value) => controller.animateToPage(value, duration: const Duration(milliseconds: 250), curve: Curves.easeIn),

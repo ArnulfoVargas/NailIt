@@ -18,7 +18,7 @@ class LoadingPage extends StatelessWidget {
           const Image(image: AssetImage("images/LogoNailIt.png"), width: 150,),
           const SizedBox(width: double.infinity, height: 200,),
           CustomLoading(
-            color: const Color(0xFF4CA1AF),
+            color: const Color(0xFF229799),
             onLoadFunction: () {
               final bloc = context.read<UserBloc>();
               if (!bloc.state.loaded) { 

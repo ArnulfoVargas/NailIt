@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
-import 'package:tarea/controllers/controllers.dart';
+import 'package:tarea/models/models.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -106,7 +106,7 @@ class _EditFormState extends State<_EditForm> {
     
         const SizedBox(height: 50,),
     
-        CustomGradientButton(
+        CustomElevatedButton(
           onPressed: _onApply,
           text: "Apply",
         )
@@ -131,40 +131,40 @@ class _EditFormState extends State<_EditForm> {
             borderRadius: BorderRadius.all(Radius.circular(10))
           ),
           actions: [
-            CustomGradientTextButton(
-              height: 40,
-              onPressed: () => Navigator.of(context).pop(),
-              text: "Cancel",
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold
-              ),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFFF416C),
-                  Color(0xFFFF4B2B),
-                ]
-              )
-            ),
+            // CustomGradientTextButton(
+            //   height: 40,
+            //   onPressed: () => Navigator.of(context).pop(),
+            //   text: "Cancel",
+            //   textStyle: const TextStyle(
+            //     fontWeight: FontWeight.bold
+            //   ),
+            //   gradient: const LinearGradient(
+            //     colors: [
+            //       Color(0xFFFF416C),
+            //       Color(0xFFFF4B2B),
+            //     ]
+            //   )
+            // ),
 
-            const SizedBox(width: 5,),
+            // const SizedBox(width: 5,),
 
-            CustomGradientTextButton(
-              height: 40,
-              onPressed: () {
-                Navigator.of(context).pop();
-                _applyChanges();
-              },
-              text: "Apply",
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF134E5E),
-                  Color(0xFF71B280),
-                ]
-              )
-            ),
+            // CustomGradientTextButton(
+            //   height: 40,
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //     _applyChanges();
+            //   },
+            //   text: "Apply",
+            //   textStyle: const TextStyle(
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            //   gradient: const LinearGradient(
+            //     colors: [
+            //       Color(0xFF134E5E),
+            //       Color(0xFF71B280),
+            //     ]
+            //   )
+            // ),
           ],
         );
       }
@@ -241,20 +241,20 @@ class _EditFormState extends State<_EditForm> {
           borderRadius: BorderRadius.all(Radius.circular(10))
         ),
         actions: [
-          CustomGradientTextButton(
-            height: 40,
-            onPressed: () => Navigator.of(context).pop(),
-            text: "Ok",
-            textStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF134E5E),
-                Color(0xFF71B280),
-              ]
-            )
-          ),
+          // CustomGradientTextButton(
+          //   height: 40,
+          //   onPressed: () => Navigator.of(context).pop(),
+          //   text: "Ok",
+          //   textStyle: const TextStyle(
+          //     fontWeight: FontWeight.bold,
+          //   ),
+          //   gradient: const LinearGradient(
+          //     colors: [
+          //       Color(0xFF134E5E),
+          //       Color(0xFF71B280),
+          //     ]
+          //   )
+          // ),
         ],
       )
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
-import 'package:tarea/controllers/user/user_controller.dart';
+import 'package:tarea/models/user/user_controller.dart';
 import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
@@ -33,16 +33,24 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(25),
               child: Column(
                 children: [
-                  const SizedBox(height: 75, width: double.infinity,),
+                  const SizedBox(height: 50, width: double.infinity,),
+
+                  const Image(
+                    image: AssetImage("images/LogoNailItI.png"),
+                    color: Color(0xFF229799),
+                    height: 100,
+                  ),
+
               
                   const Text("Login",
                     style: TextStyle(
-                      fontSize: 35,
-                      fontWeight: FontWeight.bold
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF424242)
                     ),
                   ),
               
-                  const SizedBox(height: 50,),
+                  const SizedBox(height: 20,),
               
                   CustomInput(
                     onChanged: _validateMail,
@@ -77,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
               
                   const SizedBox(height: 50,),
               
-                  CustomGradientButton(
+                  CustomElevatedButton(
                     onPressed: !isValidating ? _loginUser : null,
                     text: "Login",
                   ),
