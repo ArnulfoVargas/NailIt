@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/blocs/pages/page_cubit.dart';
+import 'package:tarea/blocs/user/tags_bloc.dart';
+import 'package:tarea/models/models.dart';
 import 'package:tarea/router/router.dart';
 import 'package:tarea/utils/utils.dart';
 
@@ -17,7 +19,8 @@ class BlocsProvider extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => UserBloc(), lazy: true,),
-        BlocProvider(create: (context) => CurrentPageBloc(0))
+        BlocProvider(create: (context) => TagsBloc(TagsModel()), lazy: false,),
+        BlocProvider(create: (context) => CurrentPageBloc(0)),
       ], 
       child: const MyApp()
     ); 

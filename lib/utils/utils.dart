@@ -15,7 +15,7 @@ class NailUtils {
           color: Colors.black54,
           fontWeight: FontWeight.bold,
           fontSize: 30
-        )
+        ),
       ),
       textTheme: const TextTheme(
         labelMedium: TextStyle(

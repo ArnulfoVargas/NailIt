@@ -1,3 +1,7 @@
+export 'package:tarea/widgets/tag_preview.dart';
+export 'package:tarea/widgets/custom_text_button.dart';
+export 'package:tarea/widgets/empty_page.dart';
+export 'package:tarea/widgets/tag.dart';
 export 'package:tarea/widgets/custom_profile_header.dart';
 export 'package:tarea/widgets/custom_elevated_button.dart';
 export 'package:tarea/widgets/custom_input.dart';

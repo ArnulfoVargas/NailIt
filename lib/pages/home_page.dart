@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tarea/widgets/widgets.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -34,14 +35,9 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-        child: SingleChildScrollView(
-          physics: BouncingScrollPhysics(),
-          child: Center(
-            child: Text("Home"),
-          )
-        ),
+      body: const EmptyPage(
+        icon: Icons.more_time_rounded,
+        label: "Nothing to do, add some activities!",
       ),
     );
   }

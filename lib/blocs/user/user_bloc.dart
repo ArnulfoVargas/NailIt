@@ -3,7 +3,9 @@ import 'package:bloc/bloc.dart';
 import 'package:tarea/models/models.dart';
 
 class UserBloc extends Cubit<UserModel>{
-  UserBloc() : super(UserModel());
+  UserBloc() : super(UserModel()) {
+    loadData();
+  }
 
   Future<void> loadData() async {
     emit(await state.loadData());

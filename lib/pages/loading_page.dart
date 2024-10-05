@@ -8,7 +8,7 @@ class LoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<UserBloc>();
+    final bloc = context.watch<UserBloc>();
 
     return Scaffold(
       body: Column(
@@ -20,10 +20,7 @@ class LoadingPage extends StatelessWidget {
           CustomLoading(
             color: const Color(0xFF229799),
             onLoadFunction: () {
-              final bloc = context.read<UserBloc>();
-              if (!bloc.state.loaded) { 
-                bloc.loadData();
-              } else {
+              if (bloc.state.loaded) { 
                 Future.delayed(Duration.zero, () {
                   final state = bloc.state;
                   if (state.mail.isEmpty || state.password.isEmpty || state.username.isEmpty || state.phone.isEmpty) {

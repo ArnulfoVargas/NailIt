@@ -11,5 +11,6 @@ class NailRouter {
     "settings" : (ctx) => const SettingsPage(),
     "loading" : (ctx) => const LoadingPage(),
     "profile" : (ctx) => const ProfileEditPage(),
+    "add_tag" : (ctx) => const AddTagPage(),
   };
 }

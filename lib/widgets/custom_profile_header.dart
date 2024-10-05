@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tarea/blocs/blocs.dart';
+import 'package:tarea/widgets/widgets.dart';
 
 class CustomProfileHeader extends StatelessWidget {
   final picker = ImagePicker();
@@ -96,9 +97,9 @@ class CustomProfileHeader extends StatelessWidget {
     }
   }
 
-  _showPictureDialog(BuildContext context) {
+  _showPictureDialog(BuildContext topContext) {
     showDialog(
-      context: context, 
+      context: topContext, 
       builder: (context) {
         final userBloc = context.read<UserBloc>();
         return AlertDialog(
@@ -115,46 +116,29 @@ class CustomProfileHeader extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    TextButton(
+                    CustomTextButton(
+                      text: "Remove", 
+                      color: const Color(0xFF229799),
                       onPressed: () {
-                        _getImage(userBloc ,option: 1);
+                        _getImage(userBloc, option: 2, context: topContext);
                         Navigator.of(context).pop();
-                      }, 
-                      child: const Text("Remove",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF229799),
-                          fontWeight: FontWeight.bold
-                        ),
-                      )
-                    ),
-                
-                    TextButton(
+                      }
+                    ),               
+                    CustomTextButton(
+                      text: "Gallery", 
+                      color: const Color(0xFF229799),
                       onPressed: () {
-                        _getImage(userBloc ,option: 1);
+                        _getImage( userBloc, option: 1);
                         Navigator.of(context).pop();
-                      }, 
-                      child: const Text("Gallery",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF229799),
-                          fontWeight: FontWeight.bold
-                        ),
-                      )
+                      }
                     ),
-                
-                    TextButton(
+                    CustomTextButton(
+                      text: "Camera", 
+                      color: const Color(0xFF229799),
                       onPressed: () {
                         _getImage(userBloc);
                         Navigator.of(context).pop();
-                      }, 
-                      child: const Text("Camera",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF229799),
-                          fontWeight: FontWeight.bold
-                        ),
-                      )
+                      }
                     ),
                   ],
                 ),
@@ -188,13 +172,19 @@ class CustomProfileHeader extends StatelessWidget {
     );
   }
 
-  Future<void> _getImage(UserBloc bloc,{int option = 0}) async {
+  Future<void> _getImage(UserBloc bloc,{int option = 0, BuildContext? context}) async {
     XFile? pickedFile;
     if (option == 0) {
       pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 50);
+    } else if (option == 2) {
+      if (bloc.state.profileImage == null) return;
+      if (bloc.state.profileImage!.isEmpty) return;
+      if (context == null) return;
+      _showUndo(context ,bloc);
+      return;
     } else {
       pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
-    }
+    } 
 
     if (pickedFile == null) return;
 
@@ -214,5 +204,35 @@ class CustomProfileHeader extends StatelessWidget {
     if (croppedFile == null) return null;
 
     return croppedFile.path;
+  }
+
+  _showUndo(BuildContext context,UserBloc bloc) {
+    String? lastPath = bloc.state.profileImage;
+    bloc.storeAndUpdate(profileImage: "");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF229799),
+        dismissDirection: DismissDirection.down,
+        behavior: SnackBarBehavior.floating,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+        elevation: 2,
+        // shape: ,
+        content: const Text("Undo action?",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+        action: SnackBarAction(
+          textColor: Colors.white,
+          label: "Yes", 
+          onPressed: () {
+            bloc.storeAndUpdate(profileImage: lastPath);
+          }
+        ),
+      )
+    );
   }
 }

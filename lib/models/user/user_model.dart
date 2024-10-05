@@ -34,7 +34,6 @@ class UserModel {
 
   Future<UserModel> loadData() async {
     SharedPreferences sh = await SharedPreferences.getInstance();
-    print(sh.getString("profileImg"));
     return UserModel(
       username: sh.getString("user") ?? "",
       mail: sh.getString("mail") ?? "",
