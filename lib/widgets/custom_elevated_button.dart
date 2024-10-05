@@ -23,13 +23,14 @@ class CustomElevatedButton extends StatelessWidget {
           ]
         ),
         child: Material(
+          color: Colors.transparent,
           child: InkWell(
             borderRadius: const BorderRadius.all(Radius.circular(10)),
             onTap: onPressed,
             child: Ink(
-              decoration: const BoxDecoration(
-                color: Color(0xFF229799),
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+              decoration: BoxDecoration(
+                color: onPressed == null ? const Color.fromARGB(255, 22, 106, 107) : const Color(0xFF229799),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
               ),
               child: Center(
                 child: Text(text, 

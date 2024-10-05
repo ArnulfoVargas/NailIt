@@ -1,1 +1,1 @@
-export 'package:tarea/models/user/user_controller.dart';
+export 'package:tarea/models/user/user_model.dart';

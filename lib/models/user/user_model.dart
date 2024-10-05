@@ -1,23 +1,55 @@
+import 'dart:io';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UserController {
+class UserModel {
   bool loaded = false;
   String username = "";
   String mail = "";
   String password = "";
   String phone = "";
+  String? profileImage;
 
-  UserController({this.mail = "", this.loaded = false, this.password = "", this.phone = "", this.username = ""});
+  UserModel({this.mail = "", this.loaded = false, this.password = "", this.phone = "", this.username = "", this.profileImage});
 
-  Future<UserController> loadData() async {
+  UserModel copyWith({String? username, String? mail, String? password, String? phone, String? profileImage}) {
+    final user = UserModel(
+      mail: mail ?? this.mail,
+      password: password ?? this.password,
+      phone: phone ?? this.phone,
+      username: username ?? this.username
+    );
+    if (profileImage == null) {
+      user.profileImage = this.profileImage;
+    } else {
+      var file = File(profileImage);
+      if (file.existsSync()) {
+        user.profileImage = profileImage;
+      } else {
+        user.profileImage = null;
+      }
+    }
+    return user;
+  }
+
+  Future<UserModel> loadData() async {
     SharedPreferences sh = await SharedPreferences.getInstance();
-    return UserController(
+    print(sh.getString("profileImg"));
+    return UserModel(
       username: sh.getString("user") ?? "",
       mail: sh.getString("mail") ?? "",
       password: sh.getString("pass") ?? "",
       phone: sh.getString("phone") ?? "",
+      profileImage: sh.getString("profileImg"),
       loaded: true
     );
+  }
+
+  Future<UserModel> clearData() async {
+    SharedPreferences sh = await SharedPreferences.getInstance();
+    await sh.clear();
+
+    return UserModel();
   }
 
   Future<void> saveData() async {
@@ -26,6 +58,9 @@ class UserController {
     sh.setString("mail", mail);
     sh.setString("pass", password);
     sh.setString("phone", phone);
+    if (profileImage != null){
+      sh.setString("profileImg", profileImage!);
+    }
   }
 
   static bool _isValidEmail(String value) {

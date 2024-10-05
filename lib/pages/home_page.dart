@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tarea/blocs/blocs.dart';
-import 'package:tarea/models/models.dart';
-import 'package:tarea/widgets/widgets.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -12,6 +7,18 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // final userCubit = context.read<UserBloc>();
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed("settings");
+            }, 
+            icon: const Icon(Icons.settings, color: Colors.black54,)
+          )
+        ],
+        title: const Text("Home"),
+      ),
+
       floatingActionButton: FloatingActionButton(
         elevation: 3,
         onPressed: (){},

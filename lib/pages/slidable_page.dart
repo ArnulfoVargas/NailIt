@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/pages/page_cubit.dart';
 import 'package:tarea/external/FluidNavBar/fluid_bottom_nav_bar.dart';
-import 'package:tarea/external/FluidNavBar/fluid_nav_bar.dart';
 import 'package:tarea/pages/pages.dart';
 
 class SlidablePage extends StatefulWidget {
@@ -31,7 +30,7 @@ class _SlidablePageState extends State<SlidablePage> {
           children: const [
             HomePage(),
             CalendarPage(),
-            SettingsPage(),
+            TagManagePage(),
           ],
         ),
       ),
@@ -44,7 +43,7 @@ class _SlidablePageState extends State<SlidablePage> {
       icons: [
         FluidNavBarIcon(icon: Icons.home),
         FluidNavBarIcon(icon: Icons.calendar_month),
-        FluidNavBarIcon(icon: Icons.settings, ),
+        FluidNavBarIcon(icon: Icons.label, ),
       ], 
       currentIndex: currentIndex,
       animationFactor: .25,

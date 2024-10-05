@@ -40,6 +40,8 @@ dependencies:
   flutter_bloc: ^8.1.6
   flutter_svg: ^1.1.6
   flutter_neat_and_clean_calendar: ^0.4.14
+  image_picker: ^1.1.2
+  image_cropper: ^8.0.2
 
 dev_dependencies:
   flutter_test:

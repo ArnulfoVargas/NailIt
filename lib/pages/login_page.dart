@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
-import 'package:tarea/models/user/user_controller.dart';
+import 'package:tarea/models/user/user_model.dart';
 import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 50,),
               
                   CustomElevatedButton(
-                    onPressed: !isValidating ? _loginUser : null,
+                    onPressed: !isValidating && !validations.hasErrors ? _loginUser : null,
                     text: "Login",
                   ),
           
@@ -107,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _validateInputs() {
-    validations = UserController.validateAllFields(mail: mailController.text, password: passController.text);
+    validations = UserModel.validateAllFields(mail: mailController.text, password: passController.text);
   }
 
   _loginUser() {
@@ -149,20 +149,28 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _navigateToHome() {
+    context.read<CurrentPageBloc>().setCurrentPage(0);
     Navigator.of(context).pushNamedAndRemoveUntil("home", (route) => !route.isActive);
   }
 
   _validateMail(String value) {
-    final validator = UserController.validateMail(value);
+    final validator = UserModel.validateMail(value);
     validations.mailErrorMsg = validator.errorMsg;
     validations.mailIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
 
   _validatePass(String value) {
-    final validator = UserController.validatePassword(value);
+    final validator = UserModel.validatePassword(value);
     validations.passwordErrorMsg = validator.errorMsg;
     validations.passwordIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
+  }
+
+  _updateHasErrors() {
+    validations.hasErrors = !validations.mailIsValid ||
+                        !validations.passwordIsValid;
   }
 }

@@ -1,21 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
+import 'package:tarea/widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.watch<UserBloc>();
-    final user = bloc.state;
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Text("data")
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Settings"),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            }, 
+            icon: const Icon(Icons.exit_to_app,
+              color: Colors.black54,
+            )
+          )
         ],
       ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+
+            CustomProfileHeader(),
+
+            _customListTile(
+              title: "Profile", 
+              icon: Icons.person,
+              onTap: () {
+                _pushTo(context, "profile");
+              }
+            ),
+            _customListTile(
+              title: "Pro", 
+              icon: Icons.monetization_on,
+              onTap: null
+            ),
+
+            _customListTile(
+              title: "Log out", 
+              icon: Icons.exit_to_app,
+              textColor: Colors.redAccent,
+              iconsColor: Colors.redAccent,
+              onTap: () {
+                _logOut(context);
+                context.read<CurrentPageBloc>().setCurrentPage(0);
+                _pushTo(context, "login");
+              }
+            )
+          ],
+        ),
+      ),
     );
+  }
+
+  Widget _customListTile({required String title, required IconData icon, Color textColor = Colors.black54, Color iconsColor = Colors.black38, void Function()? onTap}) {
+    return ListTile(
+      title: Text(title, 
+        style: TextStyle(
+          fontSize: 18,
+          color: textColor,
+        ),
+      ),
+      trailing: Icon(Icons.arrow_forward_ios_outlined, color: iconsColor, size: 20,),
+      leading: Icon(icon, color: iconsColor,),
+      tileColor: onTap == null ? Colors.black12 : Colors.transparent,
+      onTap: onTap,
+    );
+  }
+
+  Future<void> _logOut(BuildContext context) async {
+    await context.read<UserBloc>().clearData();
+  }
+
+  void _pushTo(BuildContext context, String route) {
+    Navigator.of(context).pushNamed(route);
   }
 }

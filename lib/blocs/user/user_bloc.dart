@@ -2,19 +2,26 @@
 import 'package:bloc/bloc.dart';
 import 'package:tarea/models/models.dart';
 
-class UserBloc extends Cubit<UserController>{
-  UserBloc() : super(UserController());
+class UserBloc extends Cubit<UserModel>{
+  UserBloc() : super(UserModel());
 
   Future<void> loadData() async {
     emit(await state.loadData());
   }
 
-  Future<void> storeAndUpdate({required String username, required String mail, required String password, required String phone}) async {
-    UserController newState = UserController();
-    newState.username = username;
-    newState.phone = phone;
-    newState.mail = mail;
-    newState.password = password;
+  Future<void> clearData() async {
+    emit(await state.clearData());
+  }
+
+  Future<void> storeAndUpdate({String? username, String? mail, String? password, String? phone, String? profileImage}) async {
+    final newState = state.copyWith(
+      username: username,
+      mail: mail,
+      password: password,
+      phone: phone,
+      profileImage: profileImage
+    );
+
     await newState.saveData();
     emit(newState);
   }

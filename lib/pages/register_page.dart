@@ -140,7 +140,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 50,),
               
                   CustomElevatedButton(
-                    onPressed: !isValidating ? _registerUser : null,
+                    onPressed: !isValidating && !validations.hasErrors ? _registerUser : null,
                     text: "Register",
                   ),
                       
@@ -161,7 +161,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   _validateInputs() {
-    validations = UserController.validateAllFields(
+    validations = UserModel.validateAllFields(
       username: userController.text,
       phone: phoneController.text,
       mail: mailController.text, 
@@ -196,23 +196,26 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   _validateUser(String value) {
-    final validator = UserController.validateUsername(value);
+    final validator = UserModel.validateUsername(value);
     validations.userErrorMsg = validator.errorMsg;
     validations.userIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
 
   _validatePhone(String value) {
-    final validator = UserController.validatePhone(value);
+    final validator = UserModel.validatePhone(value);
     validations.phoneErrorMsg = validator.errorMsg;
     validations.phoneIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
 
   _validateMail(String value) {
-    final validator = UserController.validateMail(value);
+    final validator = UserModel.validateMail(value);
     validations.mailErrorMsg = validator.errorMsg;
     validations.mailIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
 
@@ -221,17 +224,19 @@ class _RegisterPageState extends State<RegisterPage> {
       validations.mailConfirmIsValid = false;
       validations.mailConfirmErrorMsg = "Mails does not match";
     } else {
-      final validator = UserController.validateMail(value);
+      final validator = UserModel.validateMail(value);
       validations.mailConfirmErrorMsg = validator.errorMsg;
       validations.mailConfirmIsValid = validator.isValid;
     }
+    _updateHasErrors();
     setState(() {});
   }
 
   _validatePass(String value) {
-    final validator = UserController.validatePassword(value);
+    final validator = UserModel.validatePassword(value);
     validations.passwordErrorMsg = validator.errorMsg;
     validations.passwordIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
   _validatePassConfirm(String value) {
@@ -239,10 +244,20 @@ class _RegisterPageState extends State<RegisterPage> {
       validations.passwordConfirmIsValid = false;
       validations.passwordConfirmErrorMsg = "Passwords does not match";
     } else {
-      final validator = UserController.validatePassword(value);
+      final validator = UserModel.validatePassword(value);
       validations.passwordConfirmErrorMsg = validator.errorMsg;
       validations.passwordConfirmIsValid = validator.isValid;
     }
+    _updateHasErrors();
     setState(() {});
+  }
+
+  _updateHasErrors() {
+    validations.hasErrors = !validations.userIsValid || 
+                        !validations.mailIsValid ||
+                        !validations.mailConfirmIsValid ||
+                        !validations.passwordIsValid ||
+                        !validations.passwordConfirmIsValid ||
+                        !validations.phoneIsValid;
   }
 }

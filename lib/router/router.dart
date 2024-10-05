@@ -8,6 +8,8 @@ class NailRouter {
     "login": (ctx) => const LoginPage(),
     "register" : (ctx) => const RegisterPage(),
     "home" : (ctx) => const SlidablePage(),
+    "settings" : (ctx) => const SettingsPage(),
     "loading" : (ctx) => const LoadingPage(),
+    "profile" : (ctx) => const ProfileEditPage(),
   };
 }

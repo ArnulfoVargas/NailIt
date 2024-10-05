@@ -9,15 +9,31 @@ class ProfileEditPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const FormKeyboardHidder(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-              child: _EditForm(),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Edit Profile"),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            }, 
+            icon: const Icon(Icons.exit_to_app,
+              color: Colors.black54,
+            )
           )
-        ),
+        ],
+      ),
+      body: const FormKeyboardHidder(
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                child: _EditForm(),
+              ),
+            )
+          ),
+      ),
     );
   }
 }
@@ -35,7 +51,7 @@ class _EditFormState extends State<_EditForm> {
   final TextEditingController mailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
 
-  late UserController userData;
+  late UserModel userData;
   ValidationResult validations = ValidationResult();
 
   bool passObscureText = true;
@@ -107,7 +123,7 @@ class _EditFormState extends State<_EditForm> {
         const SizedBox(height: 50,),
     
         CustomElevatedButton(
-          onPressed: _onApply,
+          onPressed: validations.hasErrors ? null : _onApply,
           text: "Apply",
         )
       ],
@@ -131,47 +147,52 @@ class _EditFormState extends State<_EditForm> {
             borderRadius: BorderRadius.all(Radius.circular(10))
           ),
           actions: [
-            // CustomGradientTextButton(
-            //   height: 40,
-            //   onPressed: () => Navigator.of(context).pop(),
-            //   text: "Cancel",
-            //   textStyle: const TextStyle(
-            //     fontWeight: FontWeight.bold
-            //   ),
-            //   gradient: const LinearGradient(
-            //     colors: [
-            //       Color(0xFFFF416C),
-            //       Color(0xFFFF4B2B),
-            //     ]
-            //   )
-            // ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _applyChanges();
+              }, 
+              child: const SizedBox(
+                width: double.infinity,
+                child: Text("Apply",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF229799),
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              )
+            ),
 
-            // const SizedBox(width: 5,),
-
-            // CustomGradientTextButton(
-            //   height: 40,
-            //   onPressed: () {
-            //     Navigator.of(context).pop();
-            //     _applyChanges();
-            //   },
-            //   text: "Apply",
-            //   textStyle: const TextStyle(
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            //   gradient: const LinearGradient(
-            //     colors: [
-            //       Color(0xFF134E5E),
-            //       Color(0xFF71B280),
-            //     ]
-            //   )
-            // ),
+            ElevatedButton(
+              onPressed: () {
+                  Navigator.of(context).pop();
+              }, 
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.redAccent,
+                shadowColor: Colors.transparent
+              ),
+              child: const SizedBox(
+                width: double.infinity,
+                child: Text("Cancel",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              )
+            ),
           ],
         );
       }
     );
   }
 
-  void _updateControllers(UserController controller) {
+  void _updateControllers(UserModel controller) {
     userController.text = controller.username;
     mailController.text = controller.mail;
     passController.text = controller.password;
@@ -186,7 +207,7 @@ class _EditFormState extends State<_EditForm> {
   }
 
   _validateInputs() {
-    validations = UserController.validateAllFields(
+    validations = UserModel.validateAllFields(
       mail: mailController.text,
       password: passController.text,
       username: userController.text,
@@ -196,9 +217,13 @@ class _EditFormState extends State<_EditForm> {
 
   _applyChanges() {
     _validateInputs();
-    setState(() {});
     if (validations.hasErrors) {
-      _pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text("There are some errors") 
+        )
+      );
       return;
     } 
 
@@ -216,7 +241,7 @@ class _EditFormState extends State<_EditForm> {
       phone: phoneController.text
     );
 
-    Navigator.pop(context);
+    _pop();
   }
 
   _pop() {
@@ -224,8 +249,6 @@ class _EditFormState extends State<_EditForm> {
   }
 
   _showAddChagesAlert() {
-    Navigator.of(context).pop();
-
     showDialog(
       context: context, 
       builder: (context) => AlertDialog(
@@ -236,55 +259,68 @@ class _EditFormState extends State<_EditForm> {
             color: Colors.black54
           ),
         ),
-        content: const Text("You must add some changes to apply them"),
+        content: const Text("You must add some changes"),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10))
         ),
         actions: [
-          // CustomGradientTextButton(
-          //   height: 40,
-          //   onPressed: () => Navigator.of(context).pop(),
-          //   text: "Ok",
-          //   textStyle: const TextStyle(
-          //     fontWeight: FontWeight.bold,
-          //   ),
-          //   gradient: const LinearGradient(
-          //     colors: [
-          //       Color(0xFF134E5E),
-          //       Color(0xFF71B280),
-          //     ]
-          //   )
-          // ),
+            TextButton(
+              onPressed: _pop, 
+              child: const SizedBox(
+                width: double.infinity,
+                child: Text("Ok",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              )
+            )
         ],
       )
     );
   }
 
   _validateUser(String value) {
-    final validator = UserController.validateUsername(value);
+    final validator = UserModel.validateUsername(value);
     validations.userErrorMsg = validator.errorMsg;
     validations.userIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
 
   _validatePhone(String value) {
-    final validator = UserController.validatePhone(value);
+    final validator = UserModel.validatePhone(value);
     validations.phoneErrorMsg = validator.errorMsg;
     validations.phoneIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
 
   _validateMail(String value) {
-    final validator = UserController.validateMail(value);
+    final validator = UserModel.validateMail(value);
     validations.mailErrorMsg = validator.errorMsg;
     validations.mailIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
   }
 
   _validatePass(String value) {
-    final validator = UserController.validatePassword(value);
+    final validator = UserModel.validatePassword(value);
     validations.passwordErrorMsg = validator.errorMsg;
     validations.passwordIsValid = validator.isValid;
+    _updateHasErrors();
     setState(() {});
+  }
+
+  _updateHasErrors() {
+    validations.hasErrors = !validations.userIsValid || 
+                        !validations.mailIsValid ||
+                        !validations.mailConfirmIsValid ||
+                        !validations.passwordIsValid ||
+                        !validations.passwordConfirmIsValid ||
+                        !validations.phoneIsValid;
   }
 }
