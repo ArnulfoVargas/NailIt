@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
-import 'package:tarea/blocs/pages/page_cubit.dart';
 import 'package:tarea/models/models.dart';
 
 class ToDo extends StatelessWidget {
