@@ -75,6 +75,13 @@ class TagsModel {
     return TagsModel.fromJson(decoded);
   }
 
+  Future<TagsModel> clearData() async {
+    final sh = await SharedPreferences.getInstance();
+    sh.clear();
+
+    return TagsModel();
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "tags" : _tags

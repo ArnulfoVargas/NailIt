@@ -13,7 +13,7 @@ class ToDoModel {
   Color toDoColor;
 
   static bool isValidToDoName(String value) {
-    const pattern = r"^(?:[A-Za-z]{5,15})?$";
+    const pattern = r"^(?:[A-Za-z ]{5,15})?$";
     final regex = RegExp(pattern);
     return value.isNotEmpty && regex.hasMatch(value);
   }
@@ -21,7 +21,7 @@ class ToDoModel {
   static bool isValidDescription(String value) {
     const pattern = r"^(?:[A-Za-z0-9 ]{0,100})?$";
     final regex = RegExp(pattern);
-    return value.isNotEmpty && regex.hasMatch(value);
+    return regex.hasMatch(value);
   }
 
   ToDoModel({
@@ -76,7 +76,9 @@ class ToDosModel {
   ToDosModel addToDo(ToDoModel toDo) {
     const uuid = Uuid();
     final id = uuid.v8();
-    if (!_todos.containsKey(id)) _todos[id] = toDo;
+    if (!_todos.containsKey(id)) {
+      _todos[id] = toDo;
+    }
     saveData();
 
     return ToDosModel(todos: _todos);
@@ -91,28 +93,24 @@ class ToDosModel {
   }
 
   Future<void> saveData() async {
-    _todos = {
-      "asjdfkljasldfj" : ToDoModel(title: "todo1", deadLine: DateTime(2024, 12, 24), description: "tessjaldfsdkafjt jsdlafjssdklaf ", tag: "20241005-2359-8011-8414-1de39909605a", toDoColor: Colors.red),
-      "sdjlsfkajsldfl" : ToDoModel(title: "todo2", deadLine: DateTime(2024, 12, 24), description: "test", tag: "sajf", toDoColor: Colors.blue),
-      "flsdakjdflsasf" : ToDoModel(title: "todo3", deadLine: DateTime(2024, 12, 24), description: "test", tag: "sajf", toDoColor: Colors.teal),
-      "jsdklfjasdfjas" : ToDoModel(title: "todo4", deadLine: DateTime(2024, 12, 24), description: "test", tag: "sajf", toDoColor: Colors.amber),
-      "kdlsjafkjscvdf" : ToDoModel(title: "todo5", deadLine: DateTime(2024, 12, 24), description: "test", tag: "sajf", toDoColor: Colors.orange),
-      "dasklfcxvsdjkf" : ToDoModel(title: "todo6", deadLine: DateTime(2024, 12, 24), description: "test", tag: "sajf", toDoColor: Colors.purple),
-    };
-
     final data = jsonEncode(_todos);
     SharedPreferences sh = await SharedPreferences.getInstance();
     sh.setString("todos", data);
   }
 
+  Future<ToDosModel> clearData() async {
+    SharedPreferences sh = await SharedPreferences.getInstance();
+    sh.clear();
+
+    return ToDosModel();
+  }
+
   Future<ToDosModel> loadData() async {
     SharedPreferences sh = await SharedPreferences.getInstance();
+    await sh.clear();
     final jsonString = sh.getString("todos");
-
     if (jsonString == null) return ToDosModel();
-
     final json = jsonDecode(jsonString);
-
     return ToDosModel.fromJson(json);
   }
 

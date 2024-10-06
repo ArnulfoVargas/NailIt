@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
+import 'package:tarea/blocs/pages/page_cubit.dart';
 import 'package:tarea/models/models.dart';
 
 class ToDo extends StatelessWidget {
@@ -10,6 +12,9 @@ class ToDo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isValidTag = _validTag(context);
+    String tagTitle = isValidTag ? tagsBloc.getTags[toDoModel.tag]!.title : "";
+
     return Container(
       width: 50,
       decoration: const BoxDecoration(
@@ -39,7 +44,7 @@ class ToDo extends StatelessWidget {
 
             Container(
               width: MediaQuery.of(context).size.width * .33 - 10,
-              height: 70,
+              height: isValidTag ? 55 : 40,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: const BoxDecoration(
                 color: Colors.black26,
@@ -62,8 +67,9 @@ class ToDo extends StatelessWidget {
                     ),
                   ),
 
-                  Text(toDoModel.description ?? "",
-                    maxLines: 2,
+                  if (isValidTag)
+                  Text( tagTitle,
+                    maxLines: 1,
                     style: const TextStyle(
                       overflow: TextOverflow.ellipsis,
                       fontSize: 12,
@@ -87,12 +93,12 @@ class ToDo extends StatelessWidget {
                   )
                 ),
                 child: const Center(
-                  child: Icon(Icons.edit, color: Colors.black45,),
+                  child: Icon(Icons.remove_red_eye, color: Colors.black45,),
                 ),
               )
             ),
 
-            if (validTag())
+            if (isValidTag)
               _tagBlock()
           ],
         ),
@@ -100,10 +106,17 @@ class ToDo extends StatelessWidget {
     );
   }
 
-  bool validTag() {
+  bool _validTag(BuildContext context) {
     final tag = toDoModel.tag;
+    final isNotEmpty = tag != ""; 
+    final containsKey = tagsBloc.getTags.containsKey(tag);
 
-    return tag.isNotEmpty && tagsBloc.getTags.containsKey(tag);
+    if (tag != "" && !containsKey) {
+      toDoModel.tag = "";
+      context.read<ToDoBloc>().editToDo(id, toDoModel);
+    }
+
+    return isNotEmpty && containsKey;
   }
 
   Widget _tagBlock() {

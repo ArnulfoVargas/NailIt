@@ -1,18 +1,20 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class ToDosGrid extends StatelessWidget {
-  final ToDoBloc toDoBloc;
-  final TagsBloc tagsBloc;
-
-  const ToDosGrid({super.key, required this.toDoBloc, required this.tagsBloc});
+  const ToDosGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final toDoBloc = context.watch<ToDoBloc>();
+    final tagsBloc = context.watch<TagsBloc>();
+
     const double spacing = 10; 
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -10,7 +10,6 @@ class ToDoBloc extends Cubit<ToDosModel>{
 
   Future<void> loadData() async {
     final newState = await state.loadData();
-    // await state.saveData();
     emit(newState);
   }
 
@@ -24,5 +23,9 @@ class ToDoBloc extends Cubit<ToDosModel>{
 
   void editToDo(String id, ToDoModel toDo) {
     emit(state.editToDo(id, toDo));
+  }
+
+  Future<void> clearData() async {
+    emit(await state.clearData());
   }
 }

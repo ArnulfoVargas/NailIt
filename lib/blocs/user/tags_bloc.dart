@@ -25,4 +25,8 @@ class TagsBloc extends Cubit<TagsModel> {
   void editTag(String id, TagModel tag) {
     emit(state.editTag(id, tag));
   }
+
+  Future<void> clearData() async {
+    emit(await state.clearData());
+  }
 }

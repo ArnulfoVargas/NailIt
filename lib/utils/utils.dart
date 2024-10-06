@@ -59,5 +59,33 @@ class NailUtils {
       FocusManager.instance.primaryFocus?.unfocus();
     }
   }
+  static Color getContrastColor(Color color, {int? darkLuminance, int? lightLuminance}) {
+    int d = 0;
 
+    // Counting the perceptive luminance - human eye favors green color...
+    double luminance = (0.299 * color.red + 0.587 * color.green + 0.114 * color.blue) / 255;
+
+    if (luminance > 0.5) {
+      d = darkLuminance ?? 0; // bright colors - black font
+    } else {
+      d = lightLuminance ?? 255; // dark colors - white font
+    }
+
+    return Color.fromARGB(color.alpha, d, d, d);
+  }
+
+  static List<String> months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
 }

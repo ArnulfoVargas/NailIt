@@ -43,6 +43,22 @@ class SettingsPage extends StatelessWidget {
             ),
 
             _customListTile(
+              title: "Delete to do's", 
+              icon: Icons.assignment_late_rounded,
+              onTap: () async {
+                await context.read<ToDoBloc>().clearData();
+              }
+            ),
+
+            _customListTile(
+              title: "Delete tags", 
+              icon: Icons.label_off,
+              onTap: () async {
+                await context.read<TagsBloc>().clearData();
+              }
+            ),
+
+            _customListTile(
               title: "Log out", 
               icon: Icons.exit_to_app,
               textColor: Colors.redAccent,
@@ -75,7 +91,9 @@ class SettingsPage extends StatelessWidget {
   }
 
   Future<void> _logOut(BuildContext context) async {
-    await context.read<UserBloc>().clearData();
+    context.read<UserBloc>().clearData();
+    context.read<ToDoBloc>().clearData();
+    context.read<TagsBloc>().clearData();
   }
 
   void _pushTo(BuildContext context, String route) {

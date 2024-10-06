@@ -1,5 +1,13 @@
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:tarea/blocs/blocs.dart';
+import 'package:tarea/blocs/pages/page_cubit.dart';
+
 import 'package:tarea/models/models.dart';
+import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class AddToDoPage extends StatefulWidget {
@@ -12,12 +20,30 @@ class AddToDoPage extends StatefulWidget {
 class _AddToDoPageState extends State<AddToDoPage> {
   TextEditingController title = TextEditingController();
   TextEditingController description = TextEditingController();
-  Color selectedColor = Colors.teal;
-  String dateSelected = "";
+  Color selectedColor = const Color.fromARGB(255, 244, 67, 54);
+  Color tagColor = Colors.red;
+  String dateSelectedString = "";
+  String tagTitle = "";
+  String tagSelected = "";
   bool edited = false;
   bool nameHasError = false;
   bool descHasError = false;
   bool dateHasError = false;
+  bool showPreview = false;
+  bool hasTags = false;
+
+  Map<String, TagModel> tags = {};
+  DateTime? selectedDate;
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    final tagsState = context.read<TagsBloc>();
+    tags = tagsState.getTags;
+    hasTags = tags.isNotEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +110,65 @@ class _AddToDoPageState extends State<AddToDoPage> {
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: _datePickerButton(),
-                  )
+                  ),
+
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _tagsSelector(),
+                  ),
+
+                  ColorPicker(
+                    onColorChanged: (color){},
+                    color: selectedColor,
+                    pickerTypeTextStyle: const TextStyle(
+                      color: Colors.black38,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                    ),
+                    maxRecentColors: 5,
+                    selectedPickerTypeColor: const Color(0xFF229799),
+                    pickersEnabled: const {
+                      ColorPickerType.customSecondary : false,
+                      ColorPickerType.accent : true,
+                      ColorPickerType.primary : true,
+                      ColorPickerType.custom : false,
+                      ColorPickerType.wheel : true,
+                      ColorPickerType.both : false,
+                      ColorPickerType.bw : false,
+                    },
+                  ),
+
+                  if (showPreview)
+                    ToDoPreview(
+                      tagTitle: tagTitle, 
+                      toDoColor: selectedColor, 
+                      title: title.text, 
+                      tagColor: tagColor),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextButton(
+                          text: showPreview ? "Hide preview" : "Show preview", 
+                          color: const Color(0xFF229799),
+                          onPressed: () {
+                            showPreview = !showPreview;
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10,),
+                      Expanded(
+                        child: CustomTextButton(
+                          text: args.isEditing ? "Edit to do" : "Create to do", 
+                          color: const Color(0xFF229799),
+                          onPressed: dateHasError || descHasError || nameHasError? null : () {
+                            _onAppy(args);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -129,8 +213,10 @@ class _AddToDoPageState extends State<AddToDoPage> {
                     )
                   )
                 ),
-                child: Text(dateSelected.isEmpty ? "Select a date" : dateSelected, 
+                child: Text(dateSelectedString.isEmpty ? "Select a date" : dateSelectedString, 
+                  maxLines: 1,
                   style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
                     color: dateHasError ? Colors.redAccent : Colors.black38,
                     fontSize: 16,
                   ),
@@ -167,17 +253,127 @@ class _AddToDoPageState extends State<AddToDoPage> {
   }
 
   Future<void> _showDatePicker() async {
-    // DateTime? date = ShowOmni
+    DateTime? date = await showOmniDateTimePicker(
+      context: context,
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now().add(const Duration(days: 1)),
+      type: OmniDateTimePickerType.date,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF229799),
+          onPrimary: Colors.white,
+          onSurface: Colors.black54,
+        )
+      ),
+    );
+
+    if (date == null && dateSelectedString.isEmpty) {
+      dateHasError = true;
+    }
+    else {
+      if (date == null) return;
+      dateHasError = false;
+      selectedDate = date;
+      dateSelectedString = "${NailUtils.months[date.month - 1]} ${date.day}, ${date.year}";
+    }
+  }
+
+  Widget _tagsSelector() {
+    return !hasTags 
+    ? Container(
+        padding: const EdgeInsets.all(10),
+        child: const Center(
+          child: Text("You don't have any tags, add some!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black45
+            ),
+          ),
+        ),
+      )
+    : SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            ...tags.entries.map(_tagButton)
+          ],
+        ),
+      );
+  }
+
+  Widget _tagButton(MapEntry<String, TagModel> entry) {
+    final key = entry.key;
+    final model = entry.value;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: ElevatedButton(
+        onPressed: () {
+          if (tagSelected != key) {
+            tagTitle = model.title;
+            tagColor = model.color;
+            tagSelected = key;
+          } else {
+            tagTitle = "";
+            tagSelected = "";
+          }
+          setState(() {});
+        }, 
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: tagSelected == key ? model.color : Colors.transparent,
+        ),
+        child: Text(entry.value.title,
+          style: TextStyle(
+            color: tagSelected != key ? Colors.black54 : NailUtils.getContrastColor(model.color)
+          ),
+        )
+      ),
+    );
+  }
+
+  _onColorPickerChange(Color color) {
+    selectedColor = color;
+    setState(() {});
   }
 
   _validateTitle(String value) {
     nameHasError = !ToDoModel.isValidToDoName(value);
-    setState(() {
-    });
+    setState(() {});
   }
 
   _validateDescription(String value) {
     descHasError = !ToDoModel.isValidDescription(value);
     setState(() {});
+  }
+  
+  void _onAppy(ToDoArguments args) {
+    nameHasError = !ToDoModel.isValidToDoName(title.text);
+    descHasError = !ToDoModel.isValidDescription(description.text);
+    dateHasError = selectedDate == null;
+
+    setState(() {});
+    if (dateHasError || descHasError || nameHasError) return;
+
+    final bloc = context.read<ToDoBloc>();
+    final toDo = ToDoModel(
+      title: title.text, 
+      deadLine: selectedDate!,
+      toDoColor: selectedColor,
+      description: description.text,
+      tag: tagSelected,
+    );
+
+    if (args.isEditing) {
+      
+    } else {
+      bloc.addToDo(toDo);
+    }
+
+    Navigator.of(context).pop();
   }
 }

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:tarea/blocs/blocs.dart';
-
 class ToDoPreview extends StatelessWidget {
-  final String title;
-  final String? description;
+  final String tagTitle;
   final Color toDoColor;
-  final String tag;
-  final TagsBloc tagsBloc;
-  const ToDoPreview({super.key, required this.toDoColor, required this.title, this.description, required this.tag, required this.tagsBloc});
+  final String title;
+  final Color tagColor;
+  const ToDoPreview({super.key, required this.tagTitle, required this.toDoColor, required this.title, required this.tagColor, });
 
   @override
   Widget build(BuildContext context) {
+    bool isValidTag = tagTitle.isNotEmpty;
+
     return Container(
-      width: 50,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        boxShadow: [
+      width: 160,
+      height: 105,
+      decoration: BoxDecoration(
+        color: toDoColor,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        boxShadow: const [
           BoxShadow(
             blurRadius: 5,
             color: Colors.black26,
@@ -23,86 +24,69 @@ class ToDoPreview extends StatelessWidget {
           )
         ]
       ),
-      child: InkWell(
-        onTap: () {},
-        splashColor: Colors.black12,
-        highlightColor: Colors.black12.withOpacity(.15),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-        child: Stack(
-          children: [
-            Ink(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: toDoColor,
-                borderRadius: const BorderRadius.all(Radius.circular(10))
-              ),
+      child: Stack(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * .33 - 10,
+            height: isValidTag ? 55 : 40,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: const BoxDecoration(
+              color: Colors.black26,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10)
+              )
             ),
-
-            Container(
-              width: MediaQuery.of(context).size.width * .33 - 10,
-              height: 70,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: const BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.only(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    overflow: TextOverflow.ellipsis,
+                    color: Colors.white
+                  ),
+                ),
+      
+                if (isValidTag)
+                Text( tagTitle,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    fontSize: 12,
+                    color: Colors.white60
+                  ),
+                )
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: -1,
+            right: -1,
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10)
                 )
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      overflow: TextOverflow.ellipsis,
-                      color: Colors.white
-                    ),
-                  ),
-
-                  Text(description ?? "",
-                    maxLines: 2,
-                    style: const TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      fontSize: 12,
-                      color: Colors.white60
-                    ),
-                  )
-                ],
+              child: const Center(
+                child: Icon(Icons.remove_red_eye, color: Colors.black45,),
               ),
-            ),
-            Positioned(
-              bottom: -1,
-              right: -1,
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    bottomRight: Radius.circular(10)
-                  )
-                ),
-                child: const Center(
-                  child: Icon(Icons.edit, color: Colors.black45,),
-                ),
-              )
-            ),
-
-            if (validTag())
-              _tagBlock()
-          ],
-        ),
+            )
+          ),
+      
+          if (isValidTag)
+            _tagBlock()
+        ],
       ),
     );
-  }
-
-  bool validTag() {
-    return tag.isNotEmpty && tagsBloc.getTags.containsKey(tag);
   }
 
   Widget _tagBlock() {
@@ -113,7 +97,7 @@ class ToDoPreview extends StatelessWidget {
         width: 20,
         height: 20,
         decoration: BoxDecoration(
-          color: tagsBloc.getTags[tag]?.color,
+          color: tagColor,
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           border: Border.all(color: Colors.white, width: 2)
         ),

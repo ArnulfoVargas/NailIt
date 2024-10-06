@@ -17,7 +17,7 @@ class _AddTagPageState extends State<AddTagPage> {
   bool nameHasErrors = false;
   bool showPreview = false;
   bool edited = false;
-  Color selectedColor = const Color(0xFF229799);
+  Color selectedColor = const Color.fromARGB(255, 0, 150, 136);
 
   @override
   void initState() {
@@ -84,7 +84,6 @@ class _AddTagPageState extends State<AddTagPage> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold
                     ),
-                    maxRecentColors: 5,
                     selectedPickerTypeColor: const Color(0xFF229799),
                     pickersEnabled: const {
                       ColorPickerType.customSecondary : false,

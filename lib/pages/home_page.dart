@@ -47,15 +47,15 @@ class HomePage extends StatelessWidget {
   }
   
   Widget _showToDosOrEmpty(ToDoBloc toDoBloc, TagsBloc tagsBloc) {
-    if (toDoBloc.state.getToDos.isNotEmpty) return _showToDos(toDoBloc, tagsBloc);
+    if (toDoBloc.state.getToDos.isNotEmpty) return _showToDos();
     return _showEmptyPage();
   }
 
-  Widget _showToDos(ToDoBloc toDoBloc, TagsBloc tagsBloc) {
-    return SingleChildScrollView(
+  Widget _showToDos() {
+    return const SingleChildScrollView(
       child: Column(
         children: [
-          ToDosGrid(toDoBloc: toDoBloc, tagsBloc: tagsBloc)
+          ToDosGrid()
         ],
       ),
     );
