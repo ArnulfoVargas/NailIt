@@ -10,7 +10,7 @@ class TagModel {
   const TagModel({required this.title, required this.color});
 
   static bool isValidTagName(String value) {
-    const pattern = r"[a-zA-Z]{3,15}";
+    const pattern = r"^(?:[A-Za-z]{3,15})?$";
     final regex = RegExp(pattern);
     return value.isNotEmpty && regex.hasMatch(value);
   }
@@ -44,7 +44,7 @@ class TagsModel {
 
   TagsModel addTag(TagModel tag) {
     const uuid = Uuid();
-    final id = uuid.v4();
+    final id = uuid.v8();
     if (!_tags.containsKey(id)) _tags[id] = tag;
 
     saveData();
@@ -55,6 +55,7 @@ class TagsModel {
     if (!_tags.containsKey(id)) return this;
 
     _tags[id] = tag;
+    saveData();
     return TagsModel(tags: _tags);
   }
 

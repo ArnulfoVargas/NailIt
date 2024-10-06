@@ -5,7 +5,7 @@ class NailUtils {
   static getTheme(ctx) {
     return Theme.of(ctx).copyWith(
       appBarTheme: const AppBarTheme(
-        color: Colors.transparent,
+        color: Color(0xFFF5F5F5),
         surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(
           color: Colors.black54,

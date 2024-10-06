@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tarea/blocs/blocs.dart';
+import 'package:tarea/models/models.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class HomePage extends StatelessWidget {
@@ -6,7 +9,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final userCubit = context.read<UserBloc>();
+    final toDoBloc = context.watch<ToDoBloc>();
+    final tagsBloc = context.watch<TagsBloc>();
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -22,7 +27,9 @@ class HomePage extends StatelessWidget {
 
       floatingActionButton: FloatingActionButton(
         elevation: 3,
-        onPressed: (){},
+        onPressed: (){
+          Navigator.of(context).pushNamed("add_todo", arguments: ToDoArguments());
+        },
         backgroundColor: const Color(0xFF229799),
         child: const Icon(Icons.add,
           color: Colors.white,
@@ -35,10 +42,29 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: const EmptyPage(
-        icon: Icons.more_time_rounded,
-        label: "Nothing to do, add some activities!",
+      body: _showToDosOrEmpty(toDoBloc, tagsBloc)
+    );
+  }
+  
+  Widget _showToDosOrEmpty(ToDoBloc toDoBloc, TagsBloc tagsBloc) {
+    if (toDoBloc.state.getToDos.isNotEmpty) return _showToDos(toDoBloc, tagsBloc);
+    return _showEmptyPage();
+  }
+
+  Widget _showToDos(ToDoBloc toDoBloc, TagsBloc tagsBloc) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          ToDosGrid(toDoBloc: toDoBloc, tagsBloc: tagsBloc)
+        ],
       ),
+    );
+  }
+
+  Widget _showEmptyPage() {
+    return const EmptyPage(
+      icon: Icons.more_time_rounded,
+      label: "Nothing to do, add some activities!",
     );
   }
 }

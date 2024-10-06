@@ -1,50 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:tarea/models/models.dart';
+import 'package:tarea/blocs/blocs.dart';
 
-class Tag extends StatelessWidget {
-  final String tagId;
-  final TagModel tag;
-  const Tag({super.key, required this.tag, required this.tagId});
+class ToDoPreview extends StatelessWidget {
+  final String title;
+  final String? description;
+  final Color toDoColor;
+  final String tag;
+  final TagsBloc tagsBloc;
+  const ToDoPreview({super.key, required this.toDoColor, required this.title, this.description, required this.tag, required this.tagsBloc});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: 50,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(10)),
         boxShadow: [
           BoxShadow(
             blurRadius: 5,
             color: Colors.black26,
-            blurStyle: BlurStyle.outer,
+            blurStyle: BlurStyle.outer
           )
         ]
       ),
       child: InkWell(
-        onTap: () {
-          Navigator.of(context).pushNamed("add_tag", arguments: TagArguments(isEditing: true, tag: tag, tagId: tagId));
-        },
+        onTap: () {},
         splashColor: Colors.black12,
         highlightColor: Colors.black12.withOpacity(.15),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
         child: Stack(
           children: [
             Ink(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: tag.color,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(30)
-                ),
+                color: toDoColor,
+                borderRadius: const BorderRadius.all(Radius.circular(10))
               ),
             ),
 
             Container(
               width: MediaQuery.of(context).size.width * .33 - 10,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              height: 40,
+              height: 70,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: const BoxDecoration(
                 color: Colors.black26,
                 borderRadius: BorderRadius.only(
@@ -53,22 +50,30 @@ class Tag extends StatelessWidget {
                 )
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tag.title,
-                    overflow: TextOverflow.ellipsis,
+                  Text(title,
                     maxLines: 1,
                     style: const TextStyle(
-                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                       fontSize: 18,
-                      fontWeight: FontWeight.bold
+                      overflow: TextOverflow.ellipsis,
+                      color: Colors.white
                     ),
                   ),
+
+                  Text(description ?? "",
+                    maxLines: 2,
+                    style: const TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      fontSize: 12,
+                      color: Colors.white60
+                    ),
+                  )
                 ],
               ),
             ),
-
             Positioned(
               bottom: -1,
               right: -1,
@@ -86,10 +91,33 @@ class Tag extends StatelessWidget {
                   child: Icon(Icons.edit, color: Colors.black45,),
                 ),
               )
-            )
+            ),
+
+            if (validTag())
+              _tagBlock()
           ],
         ),
       ),
+    );
+  }
+
+  bool validTag() {
+    return tag.isNotEmpty && tagsBloc.getTags.containsKey(tag);
+  }
+
+  Widget _tagBlock() {
+    return Positioned(
+      top: 5,
+      right: 5,
+      child: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          color: tagsBloc.getTags[tag]?.color,
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          border: Border.all(color: Colors.white, width: 2)
+        ),
+      )
     );
   }
 }

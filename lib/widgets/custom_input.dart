@@ -55,6 +55,7 @@ class CustomInput extends StatelessWidget {
               obscureText: obscureText,
               keyboardType: inputType,
               maxLength: maxLenght,
+              maxLines: inputType == TextInputType.multiline ? null : 1,
               style: const TextStyle(
                 fontSize: 15
               ),

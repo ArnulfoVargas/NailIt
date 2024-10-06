@@ -12,5 +12,6 @@ class NailRouter {
     "loading" : (ctx) => const LoadingPage(),
     "profile" : (ctx) => const ProfileEditPage(),
     "add_tag" : (ctx) => const AddTagPage(),
+    "add_todo" : (ctx) => const AddToDoPage(),
   };
 }
