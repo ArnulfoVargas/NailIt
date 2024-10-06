@@ -19,7 +19,7 @@ class ToDoModel {
   }
 
   static bool isValidDescription(String value) {
-    const pattern = r"^(?:[A-Za-z0-9 ]{5,15})?$";
+    const pattern = r"^(?:[A-Za-z0-9 ]{0,100})?$";
     final regex = RegExp(pattern);
     return value.isNotEmpty && regex.hasMatch(value);
   }
