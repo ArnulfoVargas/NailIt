@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import './curves.dart';
 import './fluid_nav_bar_item.dart';
 
-typedef void FluidNavBarChangeCallback(int selectedIndex);
+typedef FluidNavBarChangeCallback = void Function(int selectedIndex);
 
-typedef Widget FluidNavBarItemBuilder(FluidNavBarIcon icon, FluidNavBarItem item);
+typedef FluidNavBarItemBuilder = Widget Function(FluidNavBarIcon icon, FluidNavBarItem item);
 
 /// A widget to display a fluid navigation bar with icon buttons.
 ///
@@ -62,8 +62,8 @@ class FluidNavBar extends StatefulWidget {
   final FluidNavBarItemBuilder itemBuilder;
   final int currentIndex;
 
-  FluidNavBar(
-      {Key? key,
+  const FluidNavBar(
+      {super.key,
       required this.icons,
       this.onChange,
       this.style,
@@ -72,9 +72,8 @@ class FluidNavBar extends StatefulWidget {
       this.defaultIndex = 0,
       this.currentIndex = 0,
       FluidNavBarItemBuilder? itemBuilder})
-      : this.itemBuilder = itemBuilder ?? _identityBuilder,
-        assert(icons.length > 1),
-        super(key: key);
+      : itemBuilder = itemBuilder ?? _identityBuilder,
+        assert(icons.length > 1);
 
   @override
   State createState() => _FluidNavBarState();
@@ -125,7 +124,7 @@ class _FluidNavBarState extends State<FluidNavBar> with TickerProviderStateMixin
     final pageState = context.watch<CurrentPageBloc>();
     handleTap(pageState.state);
 
-    return Container(
+    return SizedBox(
       width: appSize.width,
       height: FluidNavBar.nominalHeight,
       child: Stack(
@@ -219,7 +218,7 @@ class _FluidNavBarState extends State<FluidNavBar> with TickerProviderStateMixin
     Future.delayed(
       const Duration(milliseconds: 500) * widget.animationFactor,
       () {
-        _yController.animateTo(1.0, duration: Duration(milliseconds: 1200) * widget.animationFactor);
+        _yController.animateTo(1.0, duration: const Duration(milliseconds: 1200) * widget.animationFactor);
       },
     );
     _yController.animateTo(0.0, duration: const Duration(milliseconds: 300) * widget.animationFactor);
@@ -257,19 +256,19 @@ class _BackgroundCurvePainter extends CustomPainter {
   @override
   void paint(canvas, size) {
     // Paint two cubic bezier curves using various linear interpolations based off of the `_normalizedY` value
-    final norm = LinearPointCurve(0.5, 2.0).transform(_normalizedY) / 2;
+    final norm = const LinearPointCurve(0.5, 2.0).transform(_normalizedY) / 2;
 
     final radius = Tween<double>(begin: _radiusTop, end: _radiusBottom).transform(norm);
     // Point colinear to the top edge of the background pane
     final anchorControlOffset =
         Tween<double>(begin: radius * _horizontalControlTop, end: radius * _horizontalControlBottom)
-            .transform(LinearPointCurve(0.5, 0.75).transform(norm));
+            .transform(const LinearPointCurve(0.5, 0.75).transform(norm));
     // Point that slides up and down depending on distance for the target x position
     final dipControlOffset = Tween<double>(begin: radius * _pointControlTop, end: radius * _pointControlBottom)
-        .transform(LinearPointCurve(0.5, 0.8).transform(norm));
-    final y = Tween<double>(begin: _topY, end: _bottomY).transform(LinearPointCurve(0.2, 0.7).transform(norm));
+        .transform(const LinearPointCurve(0.5, 0.8).transform(norm));
+    final y = Tween<double>(begin: _topY, end: _bottomY).transform(const LinearPointCurve(0.2, 0.7).transform(norm));
     final dist =
-        Tween<double>(begin: _topDistance, end: _bottomDistance).transform(LinearPointCurve(0.5, 0.0).transform(norm));
+        Tween<double>(begin: _topDistance, end: _bottomDistance).transform(const LinearPointCurve(0.5, 0.0).transform(norm));
     final x0 = _x - dist / 2;
     final x1 = _x + dist / 2;
 

@@ -39,7 +39,7 @@ class ProfileEditPage extends StatelessWidget {
 }
 
 class _EditForm extends StatefulWidget {
-  const _EditForm({super.key});
+  const _EditForm();
 
   @override
   State<_EditForm> createState() => _EditFormState();

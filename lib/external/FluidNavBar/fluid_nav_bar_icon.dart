@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 
 class FluidNavBarIcon {
   /// The path of the SVG asset
+  // ignore: provide_deprecation_message
   @deprecated
   final String? iconPath;
 

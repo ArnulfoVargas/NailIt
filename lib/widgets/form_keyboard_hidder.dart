@@ -9,7 +9,6 @@ class FormKeyboardHidder extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print("object");
         NailUtils.hideKeyboard(context);
       },
       child: SizedBox(

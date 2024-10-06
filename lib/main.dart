@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
-import 'package:tarea/blocs/pages/page_cubit.dart';
-import 'package:tarea/blocs/user/tags_bloc.dart';
-import 'package:tarea/blocs/user/to_do_bloc.dart';
 import 'package:tarea/models/models.dart';
 import 'package:tarea/router/router.dart';
 import 'package:tarea/utils/utils.dart';

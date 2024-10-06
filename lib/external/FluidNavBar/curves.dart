@@ -4,15 +4,15 @@ class LinearPointCurve extends Curve {
   final double pIn;
   final double pOut;
 
-  LinearPointCurve(this.pIn, this.pOut);
+  const LinearPointCurve(this.pIn, this.pOut);
 
   @override
-  double transform(double x) {
+  double transform(double t) {
     // Just a simple bit of linear interpolation math
     final lowerScale = pOut / pIn;
     final upperScale = (1.0 - pOut) / (1.0 - pIn);
     final upperOffset = 1.0 - upperScale;
-    return x < pIn ? x * lowerScale : x * upperScale + upperOffset;
+    return t < pIn ? t * lowerScale : t * upperScale + upperOffset;
   }
 }
 

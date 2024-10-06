@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 
 import 'curves.dart';
 
-typedef void FluidNavBarButtonTappedCallback();
+typedef FluidNavBarButtonTappedCallback = void Function();
 
 /// An interactive button within [FluidNavBar]
 ///
@@ -17,7 +17,7 @@ typedef void FluidNavBarButtonTappedCallback();
 ///  * [FluidNavBarIcon]
 
 class FluidNavBarItem extends StatefulWidget {
-  static const nominalExtent = const Size(64, 64);
+  static const nominalExtent = Size(64, 64);
 
   /// The path of the SVG asset
   final String? svgPath;
@@ -46,7 +46,7 @@ class FluidNavBarItem extends StatefulWidget {
   /// The delay factor of the animations ( < 1 is faster, > 1 is slower)
   final double animationFactor;
 
-  FluidNavBarItem(
+  const FluidNavBarItem(
     this.svgPath,
     this.icon,
     this.selected,
@@ -55,7 +55,7 @@ class FluidNavBarItem extends StatefulWidget {
     this.unselectedForegroundColor,
     this.backgroundColor,
     this.scaleFactor,
-    this.animationFactor,
+    this.animationFactor, {super.key}
   )   : assert(scaleFactor >= 1.0),
         assert(svgPath == null || icon == null,
             'Cannot provide both an iconPath and an icon.'),
@@ -64,6 +64,7 @@ class FluidNavBarItem extends StatefulWidget {
 
   @override
   State createState() {
+    // ignore: no_logic_in_create_state
     return _FluidNavBarItemState(selected);
   }
 }

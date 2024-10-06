@@ -117,7 +117,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
                   ),
 
                   ColorPicker(
-                    onColorChanged: (color){},
+                    onColorChanged: _onColorPickerChange,
                     color: selectedColor,
                     pickerTypeTextStyle: const TextStyle(
                       color: Colors.black38,
