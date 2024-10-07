@@ -16,7 +16,7 @@ class BlocsProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => UserBloc(), lazy: true,),
+        BlocProvider(create: (context) => UserBloc(), lazy: false,),
         BlocProvider(create: (context) => TagsBloc(TagsModel()), lazy: false,),
         BlocProvider(create: (context) => ToDoBloc(ToDosModel()), lazy: false,),
         BlocProvider(create: (context) => CurrentPageBloc(0)),
@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.light,
       routes: NailRouter.routes,
       initialRoute: NailRouter.initialRoute,
       theme: NailUtils.getTheme(context),

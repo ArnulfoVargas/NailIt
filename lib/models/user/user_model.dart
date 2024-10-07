@@ -46,7 +46,11 @@ class UserModel {
 
   Future<UserModel> clearData() async {
     SharedPreferences sh = await SharedPreferences.getInstance();
-    await sh.clear();
+    sh.remove("user");
+    sh.remove("mail");
+    sh.remove("pass");
+    sh.remove("phone");
+    sh.remove("profileImg");
 
     return UserModel();
   }

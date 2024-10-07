@@ -57,7 +57,8 @@ class CustomInput extends StatelessWidget {
               maxLength: maxLenght,
               maxLines: inputType == TextInputType.multiline ? null : 1,
               style: const TextStyle(
-                fontSize: 15
+                fontSize: 15,
+                color: Colors.black87
               ),
               decoration: InputDecoration(
                 suffixIcon: suffixIcon,
@@ -66,6 +67,7 @@ class CustomInput extends StatelessWidget {
                 labelText: labelText,
                 labelStyle: TextStyle(
                   color: hasError ? Colors.red.shade400 : Colors.black38,
+                  fontSize: 16
                 ),
               ),
             ),

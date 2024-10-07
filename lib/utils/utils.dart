@@ -32,6 +32,12 @@ class NailUtils {
           fontFamily: "Poppins",
           color: Colors.black87
         ),
+        bodySmall: TextStyle(
+          color: Colors.black54,
+          fontFamily: "Poppins",
+          fontWeight: FontWeight.bold,
+          fontSize: 14
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

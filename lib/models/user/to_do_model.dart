@@ -100,14 +100,13 @@ class ToDosModel {
 
   Future<ToDosModel> clearData() async {
     SharedPreferences sh = await SharedPreferences.getInstance();
-    sh.clear();
+    sh.remove("todos");
 
     return ToDosModel();
   }
 
   Future<ToDosModel> loadData() async {
     SharedPreferences sh = await SharedPreferences.getInstance();
-    await sh.clear();
     final jsonString = sh.getString("todos");
     if (jsonString == null) return ToDosModel();
     final json = jsonDecode(jsonString);

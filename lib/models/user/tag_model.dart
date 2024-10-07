@@ -77,7 +77,7 @@ class TagsModel {
 
   Future<TagsModel> clearData() async {
     final sh = await SharedPreferences.getInstance();
-    sh.clear();
+    sh.remove("tags");
 
     return TagsModel();
   }

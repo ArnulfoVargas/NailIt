@@ -65,8 +65,6 @@ class SettingsPage extends StatelessWidget {
               iconsColor: Colors.redAccent,
               onTap: () {
                 _logOut(context);
-                context.read<CurrentPageBloc>().setCurrentPage(0);
-                _pushTo(context, "login");
               }
             )
           ],
@@ -91,9 +89,12 @@ class SettingsPage extends StatelessWidget {
   }
 
   Future<void> _logOut(BuildContext context) async {
-    context.read<UserBloc>().clearData();
-    context.read<ToDoBloc>().clearData();
-    context.read<TagsBloc>().clearData();
+    await context.read<UserBloc>().clearData();
+    await context.read<ToDoBloc>().clearData();
+    await context.read<TagsBloc>().clearData();
+
+    context.read<CurrentPageBloc>().setCurrentPage(0);
+    _pushTo(context, "login");
   }
 
   void _pushTo(BuildContext context, String route) {
