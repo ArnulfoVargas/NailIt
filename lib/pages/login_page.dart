@@ -124,15 +124,14 @@ class _LoginPageState extends State<LoginPage> {
 
   _checkData() async {
 
+    validations.hasErrors = false;
     if (mailController.text != "test@test.com") {
       validations.mailIsValid = false;
-      validations.hasErrors = true;
     }
     if (passController.text != "1asd1asd") {
       validations.passwordIsValid = false;
-      validations.hasErrors = true;
     }
-
+    _updateHasErrors();
     if (validations.hasErrors) return;
 
     await _storeDefaultData();
@@ -144,7 +143,8 @@ class _LoginPageState extends State<LoginPage> {
       username: "Arnulfo", 
       mail: mailController.text, 
       password: passController.text, 
-      phone: "0123456789"
+      phone: "0123456789",
+      birthDate: DateTime.now(),
     );
   }
 
@@ -172,5 +172,8 @@ class _LoginPageState extends State<LoginPage> {
   _updateHasErrors() {
     validations.hasErrors = !validations.mailIsValid ||
                         !validations.passwordIsValid;
+    
+    isValidating = false;
+    setState(() {});
   }
 }

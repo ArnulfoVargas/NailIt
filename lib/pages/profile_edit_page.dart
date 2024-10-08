@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/models/models.dart';
+import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -50,11 +52,19 @@ class _EditFormState extends State<_EditForm> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController mailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
+  final TextEditingController mailConfirmController = TextEditingController();
+  final TextEditingController passConfirmController = TextEditingController();
+
+  bool dateHasError = false;
+  DateTime? selectedDate;
+  late DateTime initialDate;
+  String dateSelectedString = "";
 
   late UserModel userData;
   ValidationResult validations = ValidationResult();
 
   bool passObscureText = true;
+  bool passConfirmObscureText = true;
 
   @override
   void initState() {
@@ -88,6 +98,8 @@ class _EditFormState extends State<_EditForm> {
           labelText: "Phone Number",
           errorText: validations.phoneErrorMsg,
         ),
+
+        _datePickerButton(),
     
         CustomInput(
           onChanged: _validateMail,
@@ -98,6 +110,17 @@ class _EditFormState extends State<_EditForm> {
           inputType: TextInputType.emailAddress,
           labelText: "Mail",
           errorText: validations.mailErrorMsg,
+        ),
+
+        CustomInput(
+          onChanged: _validateMailConfirm,
+          controller: mailConfirmController,
+          autocorrect: true,
+          hasError: !validations.mailConfirmIsValid,
+          icon: Icons.mail,
+          inputType: TextInputType.emailAddress,
+          labelText: "Confirm Mail",
+          errorText: validations.mailConfirmErrorMsg,
         ),
     
         CustomInput(
@@ -117,6 +140,26 @@ class _EditFormState extends State<_EditForm> {
               });
             }, 
             icon: Icon(passObscureText ? Icons.visibility : Icons.visibility_off, color: Colors.black38,)
+          ),
+        ),
+
+        CustomInput(
+          onChanged: _validatePassConfirm,
+          controller: passConfirmController,
+          autocorrect: false,
+          hasError: !validations.passwordConfirmIsValid,
+          icon: Icons.security,
+          inputType: TextInputType.visiblePassword,
+          labelText: "Confirm Password",
+          errorText: validations.passwordConfirmErrorMsg,
+          obscureText: passConfirmObscureText,
+          suffixIcon: IconButton(
+            onPressed: () {
+              setState(() {
+                passConfirmObscureText = !passConfirmObscureText;
+              });
+            }, 
+            icon: Icon(passConfirmObscureText ? Icons.visibility : Icons.visibility_off, color: Colors.black38,)
           ),
         ),
     
@@ -197,13 +240,20 @@ class _EditFormState extends State<_EditForm> {
     mailController.text = controller.mail;
     passController.text = controller.password;
     phoneController.text = controller.phone;
+    mailConfirmController.text = controller.mail;
+    passConfirmController.text = controller.password;
+
+    initialDate = controller.birthDate;
+    selectedDate = initialDate;
+    dateSelectedString = "${NailUtils.months[initialDate.month - 1]} ${initialDate.day}, ${initialDate.year}";
   }
 
   bool _hasChanges() {
     return  userController.text != userData.username || 
             phoneController.text != userData.phone ||
             mailController.text != userData.mail ||
-            passController.text != userData.password;
+            passController.text != userData.password ||
+            initialDate != selectedDate;
   }
 
   _validateInputs() {
@@ -238,11 +288,13 @@ class _EditFormState extends State<_EditForm> {
       username: userController.text,
       mail: mailController.text, 
       password: passController.text, 
-      phone: phoneController.text
+      phone: phoneController.text,
+      birthDate: selectedDate,
     );
 
     _pop();
   }
+
 
   _pop() {
     Navigator.of(context).pop();
@@ -307,10 +359,36 @@ class _EditFormState extends State<_EditForm> {
     setState(() {});
   }
 
+  _validateMailConfirm(String value) {
+    if (value != mailController.text) {
+      validations.mailConfirmIsValid = false;
+      validations.mailConfirmErrorMsg = "Mails does not match";
+    } else {
+      final validator = UserModel.validateMail(value);
+      validations.mailConfirmErrorMsg = validator.errorMsg;
+      validations.mailConfirmIsValid = validator.isValid;
+    }
+    _updateHasErrors();
+    setState(() {});
+  }
+
   _validatePass(String value) {
     final validator = UserModel.validatePassword(value);
     validations.passwordErrorMsg = validator.errorMsg;
     validations.passwordIsValid = validator.isValid;
+    _updateHasErrors();
+    setState(() {});
+  }
+
+  _validatePassConfirm(String value) {
+    if (value != passController.text) {
+      validations.passwordConfirmIsValid = false;
+      validations.passwordConfirmErrorMsg = "Passwords does not match";
+    } else {
+      final validator = UserModel.validatePassword(value);
+      validations.passwordConfirmErrorMsg = validator.errorMsg;
+      validations.passwordConfirmIsValid = validator.isValid;
+    }
     _updateHasErrors();
     setState(() {});
   }
@@ -322,5 +400,110 @@ class _EditFormState extends State<_EditForm> {
                         !validations.passwordIsValid ||
                         !validations.passwordConfirmIsValid ||
                         !validations.phoneIsValid;
+  }
+
+  Widget _datePickerButton() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10, left: 10, bottom: 15, top: 10),
+      child: Stack(
+        children: [
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              color: Colors.transparent,
+              boxShadow: [
+                BoxShadow(
+                  blurStyle: BlurStyle.outer,
+                  blurRadius: 5,
+                  color: dateHasError ? Colors.redAccent : Colors.black12
+                )
+              ]
+            ),
+          ),
+      
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 15.0, right: 10),
+                child: Icon(Icons.calendar_month, 
+                  color: dateHasError ? Colors.redAccent : Colors.black45,
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      right: BorderSide(
+                        color: Colors.black12
+                      )
+                    )
+                  ),
+                  child: Text(dateSelectedString.isEmpty ? "Birthdate" : dateSelectedString, 
+                    maxLines: 1,
+                    style: TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      color: dateHasError ? Colors.redAccent : Colors.black38,
+                      fontSize: 16,
+                    ),
+                  ),
+                )
+              ),
+              TextButton(
+                onPressed: _showDatePicker, 
+                style: TextButton.styleFrom(
+                  elevation: 0,
+                  maximumSize: const Size(100, 50),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10)
+                    )
+                  )
+                ),
+                child: const SizedBox(
+                  height: double.infinity,
+                  child: Center(
+                    child: Text("Select date",
+                      style: TextStyle(
+                        color: Color(0xFF229799)
+                      ),
+                    )
+                  ),
+                )
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showDatePicker() async {
+    DateTime? date = await showOmniDateTimePicker(
+      context: context,
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      type: OmniDateTimePickerType.date,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF229799),
+          onPrimary: Colors.white,
+          onSurface: Colors.black54,
+        )
+      ),
+    );
+
+    if (date == null && dateSelectedString.isEmpty) {
+      dateHasError = true;
+    }
+    else {
+      if (date == null) return;
+      dateHasError = false;
+      selectedDate = date;
+      dateSelectedString = "${NailUtils.months[date.month - 1]} ${date.day}, ${date.year}";
+    }
+
+    _updateHasErrors();
+    setState(() {});
   }
 }

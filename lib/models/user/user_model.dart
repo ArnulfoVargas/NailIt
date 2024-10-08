@@ -9,15 +9,17 @@ class UserModel {
   String password = "";
   String phone = "";
   String? profileImage;
+  DateTime birthDate;
 
-  UserModel({this.mail = "", this.loaded = false, this.password = "", this.phone = "", this.username = "", this.profileImage});
+  UserModel({this.mail = "", this.loaded = false, this.password = "", this.phone = "", this.username = "", this.profileImage, required this.birthDate});
 
-  UserModel copyWith({String? username, String? mail, String? password, String? phone, String? profileImage}) {
+  UserModel copyWith({String? username, String? mail, String? password, String? phone, String? profileImage, DateTime? birthDate}) {
     final user = UserModel(
       mail: mail ?? this.mail,
       password: password ?? this.password,
       phone: phone ?? this.phone,
-      username: username ?? this.username
+      username: username ?? this.username, 
+      birthDate: birthDate ?? this.birthDate
     );
     if (profileImage == null) {
       user.profileImage = this.profileImage;
@@ -40,7 +42,8 @@ class UserModel {
       password: sh.getString("pass") ?? "",
       phone: sh.getString("phone") ?? "",
       profileImage: sh.getString("profileImg"),
-      loaded: true
+      loaded: true,
+      birthDate: DateTime.fromMillisecondsSinceEpoch(sh.getInt("birthDate") ?? DateTime.now().millisecondsSinceEpoch)
     );
   }
 
@@ -51,8 +54,9 @@ class UserModel {
     sh.remove("pass");
     sh.remove("phone");
     sh.remove("profileImg");
+    sh.remove("birthDate");
 
-    return UserModel();
+    return UserModel(birthDate: DateTime.now());
   }
 
   Future<void> saveData() async {
@@ -61,6 +65,7 @@ class UserModel {
     sh.setString("mail", mail);
     sh.setString("pass", password);
     sh.setString("phone", phone);
+    sh.setInt("birthDate", birthDate.millisecondsSinceEpoch);
     if (profileImage != null){
       sh.setString("profileImg", profileImage!);
     }

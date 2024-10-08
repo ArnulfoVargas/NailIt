@@ -3,7 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:tarea/models/models.dart';
 
 class UserBloc extends Cubit<UserModel>{
-  UserBloc() : super(UserModel()) {
+  UserBloc() : super(UserModel(birthDate: DateTime.now())) {
     loadData();
   }
 
@@ -15,13 +15,14 @@ class UserBloc extends Cubit<UserModel>{
     emit(await state.clearData());
   }
 
-  Future<void> storeAndUpdate({String? username, String? mail, String? password, String? phone, String? profileImage}) async {
+  Future<void> storeAndUpdate({String? username, String? mail, String? password, String? phone, String? profileImage, DateTime? birthDate}) async {
     final newState = state.copyWith(
       username: username,
       mail: mail,
       password: password,
       phone: phone,
-      profileImage: profileImage
+      profileImage: profileImage,
+      birthDate: birthDate,
     );
 
     await newState.saveData();
