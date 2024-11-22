@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/models/models.dart';
-import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -19,9 +17,6 @@ class _RegisterPageState extends State<RegisterPage> {
   bool passObscureText = true;
   bool passConfirmObscureText = true;
   bool isValidating = false;
-  bool dateHasError = false;
-  DateTime? selectedDate;
-  String dateSelectedString = "";
 
   final TextEditingController userController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -79,8 +74,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     labelText: "Phone Number",
                     errorText: validations.phoneErrorMsg,
                   ),
-
-                  _datePickerButton(),
               
                   CustomInput(
                     onChanged: _validateMail,
@@ -147,7 +140,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 50,),
               
                   CustomElevatedButton(
-                    onPressed: !isValidating && (!validations.hasErrors && !dateHasError)? _registerUser : null,
+                    onPressed: !isValidating && !validations.hasErrors ? _registerUser : null,
                     text: "Register",
                   ),
                       
@@ -168,7 +161,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   _validateInputs() {
-    isValidating = true;
     validations = UserModel.validateAllFields(
       username: userController.text,
       phone: phoneController.text,
@@ -177,33 +169,34 @@ class _RegisterPageState extends State<RegisterPage> {
       password: passController.text,
       passwordConfirm: passConfirmController.text
     );
-    if (selectedDate == null) {
-      dateHasError = true;
-    } else {
-      dateHasError = false;
-    }
-    isValidating = false;
   }
 
   _registerUser() {
     _validateInputs();
-    dateHasError = selectedDate == null;
 
-    if (!validations.hasErrors && !dateHasError) {
+    if (!validations.hasErrors) {
+      isValidating = true;
       _saveAndPush();
-    }
+    } 
     setState(() {});
   }
 
   _saveAndPush() async {
-    await context.read<UserBloc>().storeAndUpdate(
+    final result = await context.read<UserBloc>().registerUser(
       username: userController.text, 
       mail: mailController.text, 
       phone: phoneController.text, 
-      password: passController.text,
-      birthDate: selectedDate
+      password: passController.text
     );
-    _goHome();
+
+    if (result["ok"]) {
+      _goHome();
+    }
+    else {
+      isValidating = false;
+      _showError(context, result["error"]);
+      setState(() {});
+    }
   }
 
   _goHome() {
@@ -276,108 +269,25 @@ class _RegisterPageState extends State<RegisterPage> {
                         !validations.phoneIsValid;
   }
 
-  Widget _datePickerButton() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10, left: 10, bottom: 15, top: 10),
-      child: Stack(
-        children: [
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              color: Colors.transparent,
-              boxShadow: [
-                BoxShadow(
-                  blurStyle: BlurStyle.outer,
-                  blurRadius: 5,
-                  color: dateHasError ? Colors.redAccent : Colors.black12
-                )
-              ]
-            ),
+  _showError(BuildContext context, String errorMsg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color.fromARGB(255, 252, 49, 49),
+        dismissDirection: DismissDirection.down,
+        behavior: SnackBarBehavior.floating,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        elevation: 2,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10))
+        ),
+        content: Text(errorMsg,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.bold
           ),
-      
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0, right: 10),
-                child: Icon(Icons.calendar_month, 
-                  color: dateHasError ? Colors.redAccent : Colors.black45,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      right: BorderSide(
-                        color: Colors.black12
-                      )
-                    )
-                  ),
-                  child: Text(dateSelectedString.isEmpty ? "Birthdate" : dateSelectedString, 
-                    maxLines: 1,
-                    style: TextStyle(
-                      overflow: TextOverflow.ellipsis,
-                      color: dateHasError ? Colors.redAccent : Colors.black38,
-                      fontSize: 16,
-                    ),
-                  ),
-                )
-              ),
-              TextButton(
-                onPressed: _showDatePicker, 
-                style: TextButton.styleFrom(
-                  elevation: 0,
-                  maximumSize: const Size(100, 50),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10)
-                    )
-                  )
-                ),
-                child: const SizedBox(
-                  height: double.infinity,
-                  child: Center(
-                    child: Text("Select date",
-                      style: TextStyle(
-                        color: Color(0xFF229799)
-                      ),
-                    )
-                  ),
-                )
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      )
     );
-  }
-
-  Future<void> _showDatePicker() async {
-    DateTime? date = await showOmniDateTimePicker(
-      context: context,
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-      type: OmniDateTimePickerType.date,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF229799),
-          onPrimary: Colors.white,
-          onSurface: Colors.black54,
-        )
-      ),
-    );
-
-    if (date == null && dateSelectedString.isEmpty) {
-      dateHasError = true;
-    }
-    else {
-      if (date == null) return;
-      dateHasError = false;
-      selectedDate = date;
-      dateSelectedString = "${NailUtils.months[date.month - 1]} ${date.day}, ${date.year}";
-    }
-
-    _updateHasErrors();
-    setState(() {});
   }
 }

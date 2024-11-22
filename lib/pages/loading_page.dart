@@ -24,7 +24,7 @@ class LoadingPage extends StatelessWidget {
                 Future.delayed(Duration.zero, () async {
                   final state = bloc.state;
 
-                  if (state.mail.isEmpty || state.password.isEmpty || state.username.isEmpty || state.phone.isEmpty) {
+                  if (state.id < 0) {
                     // ignore: use_build_context_synchronously
                     Navigator.of(context).pushReplacementNamed("login");
                   } else {

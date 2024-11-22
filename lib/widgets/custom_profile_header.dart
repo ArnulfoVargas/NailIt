@@ -37,7 +37,10 @@ class CustomProfileHeader extends StatelessWidget {
                     fontWeight: FontWeight.bold
                   ),
                 ),
-                Text(user.mail)
+                Text(user.mail),
+
+                if (user.userType == 1)
+                  const Text("Premium"),
               ],
             )
           ],
@@ -85,16 +88,11 @@ class CustomProfileHeader extends StatelessWidget {
       color: Colors.black54,
     );
 
-    if (path == null) {
+    if (path == null || path == "") {
       return icon;
     }
 
-    File file = File(path);
-    if (file.existsSync()) {
-      return Image(image: FileImage(file),);
-    } else {
-      return icon;
-    }
+    return Image(image: NetworkImage(path),);
   }
 
   _showPictureDialog(BuildContext topContext) {
@@ -175,15 +173,19 @@ class CustomProfileHeader extends StatelessWidget {
   Future<void> _getImage(UserBloc bloc,{int option = 0, BuildContext? context}) async {
     XFile? pickedFile;
     if (option == 0) {
-      pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 50);
+      pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 25);
     } else if (option == 2) {
       if (bloc.state.profileImage == null) return;
       if (bloc.state.profileImage!.isEmpty) return;
       if (context == null) return;
-      _showUndo(context ,bloc);
+      final result = await bloc.removeImage();
+
+      if (!result["ok"]) {
+        _showError(context, result["error"]);
+      }
       return;
     } else {
-      pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+      pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 25);
     } 
 
     if (pickedFile == null) return;
@@ -191,7 +193,13 @@ class CustomProfileHeader extends StatelessWidget {
     String? path = await _cut(File(pickedFile.path)); 
 
     if (path == null || path.isEmpty) return;
-    bloc.storeAndUpdate(profileImage: path);
+
+    final result = await bloc.updateImage(path);
+
+    if (!result["ok"]) {
+      if (context == null) return;
+      _showError(context, result["error"]);
+    }
   }
 
   Future<String?> _cut(File file) async {
@@ -206,31 +214,23 @@ class CustomProfileHeader extends StatelessWidget {
     return croppedFile.path;
   }
 
-  _showUndo(BuildContext context,UserBloc bloc) {
-    String? lastPath = bloc.state.profileImage;
-    bloc.storeAndUpdate(profileImage: "");
-
+  _showError(BuildContext context, String errorMsg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF229799),
+        backgroundColor: const Color.fromARGB(255, 252, 49, 49),
         dismissDirection: DismissDirection.down,
         behavior: SnackBarBehavior.floating,
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         elevation: 2,
-        // shape: ,
-        content: const Text("Undo action?",
-          style: TextStyle(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10))
+        ),
+        content: Text(errorMsg,
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.white,
             fontWeight: FontWeight.bold
           ),
-        ),
-        action: SnackBarAction(
-          textColor: Colors.white,
-          label: "Yes", 
-          onPressed: () {
-            bloc.storeAndUpdate(profileImage: lastPath);
-          }
         ),
       )
     );

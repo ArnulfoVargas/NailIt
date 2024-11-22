@@ -1,3 +1,4 @@
+export 'package:tarea/pages/premium_page.dart';
 export 'package:tarea/pages/add_tag_page.dart';
 export 'package:tarea/pages/add_to_do_page.dart';
 export 'package:tarea/pages/calendar_page.dart';

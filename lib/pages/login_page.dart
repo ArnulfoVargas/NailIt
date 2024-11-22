@@ -124,28 +124,15 @@ class _LoginPageState extends State<LoginPage> {
 
   _checkData() async {
 
-    validations.hasErrors = false;
-    if (mailController.text != "test@test.com") {
-      validations.mailIsValid = false;
-    }
-    if (passController.text != "1asd1asd") {
-      validations.passwordIsValid = false;
-    }
-    _updateHasErrors();
-    if (validations.hasErrors) return;
+    final result = await context.read<UserBloc>().loginUser(mail: mailController.text, password: passController.text);
 
-    await _storeDefaultData();
-    _navigateToHome();
-  }
-
-  _storeDefaultData() {
-    context.read<UserBloc>().storeAndUpdate(
-      username: "Arnulfo", 
-      mail: mailController.text, 
-      password: passController.text, 
-      phone: "0123456789",
-      birthDate: DateTime.now(),
-    );
+    if (result["ok"]) {
+      _navigateToHome();
+    } else {
+      isValidating = false;
+      _showError(context, result["error"]);
+      setState(() {});
+    }
   }
 
   _navigateToHome() {
@@ -172,8 +159,26 @@ class _LoginPageState extends State<LoginPage> {
   _updateHasErrors() {
     validations.hasErrors = !validations.mailIsValid ||
                         !validations.passwordIsValid;
-    
-    isValidating = false;
-    setState(() {});
+  }
+   _showError(BuildContext context, String errorMsg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color.fromARGB(255, 252, 49, 49),
+        dismissDirection: DismissDirection.down,
+        behavior: SnackBarBehavior.floating,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        elevation: 2,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10))
+        ),
+        content: Text(errorMsg,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      )
+    );
   }
 }

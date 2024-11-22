@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 class NailUtils {
+  static String baseRoute = "nailit-api.onrender.com";
   static getTheme(ctx) {
     return Theme.of(ctx).copyWith(
       appBarTheme: const AppBarTheme(

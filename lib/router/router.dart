@@ -6,6 +6,7 @@ class NailRouter {
   static String initialRoute = "loading";
   static Map<String, Widget Function(BuildContext)> routes = {
     "login": (ctx) => const LoginPage(),
+    "premium": (ctx) => const PremiumPage(),
     "register" : (ctx) => const RegisterPage(),
     "home" : (ctx) => const SlidablePage(),
     "settings" : (ctx) => const SettingsPage(),

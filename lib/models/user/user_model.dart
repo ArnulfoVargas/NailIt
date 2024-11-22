@@ -1,74 +1,39 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tarea/utils/utils.dart';
 
 class UserModel {
+  int id = 0;
   bool loaded = false;
   String username = "";
   String mail = "";
   String password = "";
   String phone = "";
   String? profileImage;
-  DateTime birthDate;
+  int userType;
 
-  UserModel({this.mail = "", this.loaded = false, this.password = "", this.phone = "", this.username = "", this.profileImage, required this.birthDate});
+  UserModel({this.mail = "", this.loaded = false, this.password = "", this.phone = "", this.username = "", this.profileImage, this.id = -1, this.userType = -1});
 
-  UserModel copyWith({String? username, String? mail, String? password, String? phone, String? profileImage, DateTime? birthDate}) {
+  UserModel copyWith({String? username, String? mail, String? password, String? phone, String? profileImage}) {
     final user = UserModel(
       mail: mail ?? this.mail,
       password: password ?? this.password,
       phone: phone ?? this.phone,
-      username: username ?? this.username, 
-      birthDate: birthDate ?? this.birthDate
+      username: username ?? this.username,
+      id: id,
+      userType: userType
     );
     if (profileImage == null) {
       user.profileImage = this.profileImage;
     } else {
-      var file = File(profileImage);
-      if (file.existsSync()) {
-        user.profileImage = profileImage;
-      } else {
-        user.profileImage = null;
-      }
-    }
+      user.profileImage = profileImage;
+    } 
+
     return user;
-  }
-
-  Future<UserModel> loadData() async {
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    return UserModel(
-      username: sh.getString("user") ?? "",
-      mail: sh.getString("mail") ?? "",
-      password: sh.getString("pass") ?? "",
-      phone: sh.getString("phone") ?? "",
-      profileImage: sh.getString("profileImg"),
-      loaded: true,
-      birthDate: DateTime.fromMillisecondsSinceEpoch(sh.getInt("birthDate") ?? DateTime.now().millisecondsSinceEpoch)
-    );
-  }
-
-  Future<UserModel> clearData() async {
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    sh.remove("user");
-    sh.remove("mail");
-    sh.remove("pass");
-    sh.remove("phone");
-    sh.remove("profileImg");
-    sh.remove("birthDate");
-
-    return UserModel(birthDate: DateTime.now());
-  }
-
-  Future<void> saveData() async {
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    sh.setString("user", username);
-    sh.setString("mail", mail);
-    sh.setString("pass", password);
-    sh.setString("phone", phone);
-    sh.setInt("birthDate", birthDate.millisecondsSinceEpoch);
-    if (profileImage != null){
-      sh.setString("profileImg", profileImage!);
-    }
   }
 
   static bool _isValidEmail(String value) {
@@ -207,6 +172,209 @@ class UserModel {
 
     return result;
   } 
+
+  Future<UserModel> loadData() async {
+    SharedPreferences sh = await SharedPreferences.getInstance();
+    String tk = sh.getString("tk") ?? "";
+
+    if (tk == "") {
+      return UserModel(loaded: true);
+    }
+
+    final url = Uri.https(NailUtils.baseRoute, "user/validate");
+    final res = await http.post(url, body: jsonEncode({"pauth":tk}));
+    final data = jsonDecode(res.body);
+    final user = data["body"]["user"];
+
+    return UserModel(
+      id: data["body"]["id"],
+      username: user["name"],
+      mail: user["mail"],
+      phone: user["phone"],
+      password: user["password"],
+      profileImage: user["image_url"],
+      userType: user["user_type"],
+      loaded: true
+    );
+  }
+
+  Future<UserModel> clearData() async {
+    SharedPreferences sh = await SharedPreferences.getInstance();
+    sh.remove("tk");
+
+    return UserModel();
+  }
+
+  Future<Map<String, dynamic>> updateUser() async {
+    final uri = Uri.https(NailUtils.baseRoute, "user/update/$id");
+    final res = await http.patch(uri, body: jsonEncode(toJson()));
+    final data = jsonDecode(res.body);
+
+    final ok = data["status"] == 200;
+
+    if (ok) {
+      final body = data["body"];
+      SharedPreferences.getInstance().then((sh) {
+        sh.setString("tk", body["tk"]);
+      });
+
+      final user = data["body"]["user"];
+      username = user["name"];
+      mail = user["mail"];
+      phone = user["phone"];
+      password = user["password"];
+
+      return {
+        "ok" : true
+      };
+    }
+
+    return {
+      "ok" : false,
+      "error": data["error_msg"]
+    };
+  }
+
+  Future<Map<String, dynamic>> register() async {
+
+    final uri = Uri.https(NailUtils.baseRoute, "user/register");
+    final res = await http.post(uri, body: jsonEncode(toJson()));
+    final data = jsonDecode(res.body);
+    final ok = data["status"] == 200;
+
+    if (ok) {
+      SharedPreferences.getInstance().then((sh) {
+        sh.setString("tk", data["body"]["tk"]);
+      });
+
+      final user = data["body"]["user"];
+      username = user["name"];
+      mail = user["mail"];
+      phone = user["phone"];
+      password = user["password"];
+      userType = user["user_type"];
+      profileImage = user["image_url"];
+      id = data["body"]["id"];
+
+      return {
+        "ok" : ok,
+        "id" : data["body"]["id"],
+      };
+    }
+
+    return {
+      "ok" : false,
+      "error" : data['error_msg']
+    };
+  }
+
+  Future<Map<String, dynamic>> loginUser() async {
+    final uri = Uri.https(NailUtils.baseRoute, "user/login");
+    final res = await http.post(uri, body: jsonEncode(toJson()));
+    final data = jsonDecode(res.body);
+    final ok = data["status"] == 200;
+
+    if (ok) {
+      SharedPreferences.getInstance().then((sh) {
+        sh.setString("tk", data["body"]["tk"]);
+      });
+
+      final user = data["body"]["user"];
+      username = user["name"];
+      mail = user["mail"];
+      phone = user["phone"];
+      password = user["password"];
+      profileImage = user["image_url"];
+      userType = user["user_type"];
+      id = data["body"]["id"];
+
+      return {
+        "ok" : true,
+        "id" : data["body"]["id"]
+      };
+    }
+
+    return {
+      "ok" : false,
+      "error" : data['error_msg']
+    };
+  }
+
+  Future<Map<String, dynamic>> updateImage() async {
+    if (profileImage == null || id < 0) {
+      return {
+        "ok" : false,
+        "error" : "No such image"
+      };
+    }
+
+    final uri = Uri.https(NailUtils.baseRoute, "user/profile/$id");
+    final req = http.MultipartRequest("PUT", uri);
+    final file = await http.MultipartFile.fromPath("file", profileImage!);
+    req.files.add(file);
+    final stream = await req.send();
+    final res = await http.Response.fromStream(stream);
+    final data = jsonDecode(res.body);
+
+    if (data["status"] != 200) {
+      return {
+        "ok" : false,
+        "error": data["error_msg"]
+      };
+    }
+
+    profileImage = data["body"];
+
+    return {
+      "ok" : true,
+    };
+  } 
+
+  Future<Map<String, dynamic>> removeImage() async {
+    final uri = Uri.https(NailUtils.baseRoute, "user/profile/$id");
+    final req = await http.delete(uri);
+    final data = jsonDecode(req.body);
+
+    if (data["status"] != 200) {
+      return {
+        "ok" : false,
+        "error": data["error_msg"]
+      };
+    }
+
+    profileImage = "";
+    return {
+      "ok" : true
+    };
+  }
+
+  Future<Map<String, dynamic>> convertToPremium() async {
+    final uri = Uri.https(NailUtils.baseRoute, "user/premium/$id");
+    final req = await http.patch(uri);
+    final data = jsonDecode(req.body);
+
+    if (data["status"] != 200) {
+      return {
+        "ok" : false,
+        "error": data["error_msg"]
+      };
+    }
+
+    userType = 1;
+
+    return {
+      "ok" : true
+    };
+  }
+
+  Map<String ,dynamic> toJson() {
+    return {
+      "name" : username,
+      "mail" : mail,
+      "phone": phone,
+      "password": password
+    };
+  }
 }
 
 class SingleValidResult {
@@ -235,3 +403,4 @@ class ValidationResult {
   bool phoneIsValid = true;
   String phoneErrorMsg = "";
 }
+

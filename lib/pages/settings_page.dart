@@ -39,7 +39,9 @@ class SettingsPage extends StatelessWidget {
             _customListTile(
               title: "Pro", 
               icon: Icons.monetization_on,
-              onTap: null
+              onTap: () {
+                Navigator.of(context).pushNamed("premium");
+              }
             ),
 
             _customListTile(
@@ -88,16 +90,17 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _logOut(BuildContext context) async {
-    await context.read<UserBloc>().clearData();
-    await context.read<ToDoBloc>().clearData();
-    await context.read<TagsBloc>().clearData();
-
+  void _logOut(BuildContext context) async {
+    context.read<UserBloc>().clearData();
     context.read<CurrentPageBloc>().setCurrentPage(0);
     _pushTo(context, "login");
   }
 
   void _pushTo(BuildContext context, String route) {
     Navigator.of(context).pushNamed(route);
+  }
+
+  Future<void> _convertToPremium(UserBloc bloc) async {
+    await bloc.convertToPremium();
   }
 }
