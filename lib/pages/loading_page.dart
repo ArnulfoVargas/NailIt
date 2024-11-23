@@ -29,6 +29,8 @@ class LoadingPage extends StatelessWidget {
                     Navigator.of(context).pushReplacementNamed("login");
                   } else {
                     // ignore: use_build_context_synchronously
+                    context.read<TagsBloc>().loadData(state.id);
+
                     Navigator.of(context).pushReplacementNamed("home");
                   }
                 });

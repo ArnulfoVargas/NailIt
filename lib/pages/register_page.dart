@@ -194,6 +194,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
     else {
       isValidating = false;
+      print(result);
       _showError(context, result["error"]);
       setState(() {});
     }

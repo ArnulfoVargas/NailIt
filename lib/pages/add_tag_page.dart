@@ -172,15 +172,16 @@ class _AddTagPageState extends State<AddTagPage> {
     if (nameHasErrors) return;
 
     final bloc = context.read<TagsBloc>();
+    final id = context.read<UserBloc>().state.id;
     TagModel tag = TagModel(
       title: nameController.text,
       color: selectedColor
     );
 
     if (args.isEditing) {
-      bloc.editTag(args.tagId, tag);
+      bloc.editTag(args.tagId, id, tag);
     } else {
-      bloc.addTag(tag);
+      bloc.addTag(tag, id);
     }
 
     Navigator.of(context).pop();
@@ -188,8 +189,14 @@ class _AddTagPageState extends State<AddTagPage> {
 
   _onDelete(TagArguments args) {
     final bloc = context.read<TagsBloc>();
+
+    TagModel tag = TagModel(
+      title: nameController.text,
+      color: selectedColor
+    );
     if (args.isEditing) {
-      bloc.removeTag(args.tagId);
+      final id = context.read<UserBloc>().state.id;
+      bloc.removeTag(args.tagId, id, tag);
       Navigator.of(context).pop();
     }
   }

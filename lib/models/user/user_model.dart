@@ -178,24 +178,35 @@ class UserModel {
     String tk = sh.getString("tk") ?? "";
 
     if (tk == "") {
-      return UserModel(loaded: true);
+      return UserModel(
+        id: -1,
+        loaded: true
+      );
     }
+    try {
+      final url = Uri.https(NailUtils.baseRoute, "user/validate");
+      final res = await http.post(url, body: jsonEncode({"pauth":tk}));
+      final data = jsonDecode(res.body);
+      final user = data["body"]["user"];
 
-    final url = Uri.https(NailUtils.baseRoute, "user/validate");
-    final res = await http.post(url, body: jsonEncode({"pauth":tk}));
-    final data = jsonDecode(res.body);
-    final user = data["body"]["user"];
-
-    return UserModel(
-      id: data["body"]["id"],
-      username: user["name"],
-      mail: user["mail"],
-      phone: user["phone"],
-      password: user["password"],
-      profileImage: user["image_url"],
-      userType: user["user_type"],
-      loaded: true
-    );
+      return UserModel(
+        id: data["body"]["id"],
+        username: user["name"],
+        mail: user["mail"],
+        phone: user["phone"],
+        password: user["password"],
+        profileImage: user["image_url"],
+        userType: user["user_type"],
+        loaded: true
+      );
+    } catch(error) {
+      sh.remove("tk");
+      return UserModel(
+        id: -1,
+        loaded: true
+      );
+    }
+ 
   }
 
   Future<UserModel> clearData() async {
@@ -206,165 +217,207 @@ class UserModel {
   }
 
   Future<Map<String, dynamic>> updateUser() async {
-    final uri = Uri.https(NailUtils.baseRoute, "user/update/$id");
-    final res = await http.patch(uri, body: jsonEncode(toJson()));
-    final data = jsonDecode(res.body);
 
-    final ok = data["status"] == 200;
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "user/update/$id");
+      final res = await http.patch(uri, body: jsonEncode(toJson()));
+      final data = jsonDecode(res.body);
 
-    if (ok) {
-      final body = data["body"];
-      SharedPreferences.getInstance().then((sh) {
-        sh.setString("tk", body["tk"]);
-      });
+      final ok = data["status"] == 200;
 
-      final user = data["body"]["user"];
-      username = user["name"];
-      mail = user["mail"];
-      phone = user["phone"];
-      password = user["password"];
+      if (ok) {
+        final body = data["body"];
+        SharedPreferences.getInstance().then((sh) {
+          sh.setString("tk", body["tk"]);
+        });
+
+        final user = data["body"]["user"];
+        username = user["name"];
+        mail = user["mail"];
+        phone = user["phone"];
+        password = user["password"];
+
+        return {
+          "ok" : true
+        };
+      }
+
+      return {
+        "ok" : false,
+        "error": data["error_msg"]
+      };
+    } catch (e) {
+      return {
+        "ok": false,
+        "error": "Couldnt connect to service, try again later"
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> register() async {
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "user/register");
+      final res = await http.post(uri, body: jsonEncode(toJson()));
+      final data = jsonDecode(res.body);
+      final ok = data["status"] == 201;
+
+      if (ok) {
+        SharedPreferences.getInstance().then((sh) {
+          sh.setString("tk", data["body"]["tk"]);
+        });
+
+        final user = data["body"]["user"];
+        username = user["name"];
+        mail = user["mail"];
+        phone = user["phone"];
+        password = user["password"];
+        userType = user["user_type"];
+        profileImage = user["image_url"];
+        id = data["body"]["id"];
+
+        return {
+          "ok" : ok,
+          "id" : data["body"]["id"],
+        };
+      }
+
+      return {
+        "ok" : false,
+        "error" : data['error_msg']
+      };
+    } catch (e) {
+      return {
+        "ok": false,
+        "error": "Couldnt connect to service, try again later"
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> loginUser() async {
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "user/login");
+      final res = await http.post(uri, body: jsonEncode(toJson()));
+      final data = jsonDecode(res.body);
+      final ok = data["status"] == 200;
+
+      if (ok) {
+        SharedPreferences.getInstance().then((sh) {
+          sh.setString("tk", data["body"]["tk"]);
+        });
+
+        final user = data["body"]["user"];
+        username = user["name"];
+        mail = user["mail"];
+        phone = user["phone"];
+        password = user["password"];
+        profileImage = user["image_url"];
+        userType = user["user_type"];
+        id = data["body"]["id"];
+
+        return {
+          "ok" : true,
+          "id" : data["body"]["id"]
+        };
+      }
+
+      return {
+        "ok" : false,
+        "error" : data['error_msg']
+      };
+    } catch (e) {
+      return {
+        "ok": false,
+        "error": "Couldnt connect to service, try again later"
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> updateImage() async {
+    try {
+      if (profileImage == null || id < 0) {
+        return {
+          "ok" : false,
+          "error" : "No such image"
+        };
+      }
+
+      final uri = Uri.https(NailUtils.baseRoute, "user/profile/$id");
+      final req = http.MultipartRequest("PUT", uri);
+      final file = await http.MultipartFile.fromPath("file", profileImage!);
+      req.files.add(file);
+      final stream = await req.send();
+      final res = await http.Response.fromStream(stream);
+      final data = jsonDecode(res.body);
+
+      if (data["status"] != 200) {
+        return {
+          "ok" : false,
+          "error": data["error_msg"]
+        };
+      }
+
+      profileImage = data["body"];
+
+      return {
+        "ok" : true,
+      };
+    } catch (e) {
+      return {
+        "ok": false,
+        "error": "Couldnt connect to service, try again later"
+      };
+    }
+  } 
+
+  Future<Map<String, dynamic>> removeImage() async {
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "user/profile/$id");
+      final req = await http.delete(uri);
+      final data = jsonDecode(req.body);
+
+      if (data["status"] != 200) {
+        return {
+          "ok" : false,
+          "error": data["error_msg"]
+        };
+      }
+
+      profileImage = "";
+      return {
+        "ok" : true
+      };
+    } catch (e) {
+      return {
+        "ok": false,
+        "error": "Couldnt connect to service, try again later"
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> convertToPremium() async {
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "user/premium/$id");
+      final req = await http.patch(uri);
+      final data = jsonDecode(req.body);
+
+      if (data["status"] != 200) {
+        return {
+          "ok" : false,
+          "error": data["error_msg"]
+        };
+      }
+
+      userType = 1;
 
       return {
         "ok" : true
       };
-    }
-
-    return {
-      "ok" : false,
-      "error": data["error_msg"]
-    };
-  }
-
-  Future<Map<String, dynamic>> register() async {
-
-    final uri = Uri.https(NailUtils.baseRoute, "user/register");
-    final res = await http.post(uri, body: jsonEncode(toJson()));
-    final data = jsonDecode(res.body);
-    final ok = data["status"] == 200;
-
-    if (ok) {
-      SharedPreferences.getInstance().then((sh) {
-        sh.setString("tk", data["body"]["tk"]);
-      });
-
-      final user = data["body"]["user"];
-      username = user["name"];
-      mail = user["mail"];
-      phone = user["phone"];
-      password = user["password"];
-      userType = user["user_type"];
-      profileImage = user["image_url"];
-      id = data["body"]["id"];
-
+    } catch (e) {
       return {
-        "ok" : ok,
-        "id" : data["body"]["id"],
+        "ok": false,
+        "error": "Couldnt connect to service, try again later"
       };
     }
-
-    return {
-      "ok" : false,
-      "error" : data['error_msg']
-    };
-  }
-
-  Future<Map<String, dynamic>> loginUser() async {
-    final uri = Uri.https(NailUtils.baseRoute, "user/login");
-    final res = await http.post(uri, body: jsonEncode(toJson()));
-    final data = jsonDecode(res.body);
-    final ok = data["status"] == 200;
-
-    if (ok) {
-      SharedPreferences.getInstance().then((sh) {
-        sh.setString("tk", data["body"]["tk"]);
-      });
-
-      final user = data["body"]["user"];
-      username = user["name"];
-      mail = user["mail"];
-      phone = user["phone"];
-      password = user["password"];
-      profileImage = user["image_url"];
-      userType = user["user_type"];
-      id = data["body"]["id"];
-
-      return {
-        "ok" : true,
-        "id" : data["body"]["id"]
-      };
-    }
-
-    return {
-      "ok" : false,
-      "error" : data['error_msg']
-    };
-  }
-
-  Future<Map<String, dynamic>> updateImage() async {
-    if (profileImage == null || id < 0) {
-      return {
-        "ok" : false,
-        "error" : "No such image"
-      };
-    }
-
-    final uri = Uri.https(NailUtils.baseRoute, "user/profile/$id");
-    final req = http.MultipartRequest("PUT", uri);
-    final file = await http.MultipartFile.fromPath("file", profileImage!);
-    req.files.add(file);
-    final stream = await req.send();
-    final res = await http.Response.fromStream(stream);
-    final data = jsonDecode(res.body);
-
-    if (data["status"] != 200) {
-      return {
-        "ok" : false,
-        "error": data["error_msg"]
-      };
-    }
-
-    profileImage = data["body"];
-
-    return {
-      "ok" : true,
-    };
-  } 
-
-  Future<Map<String, dynamic>> removeImage() async {
-    final uri = Uri.https(NailUtils.baseRoute, "user/profile/$id");
-    final req = await http.delete(uri);
-    final data = jsonDecode(req.body);
-
-    if (data["status"] != 200) {
-      return {
-        "ok" : false,
-        "error": data["error_msg"]
-      };
-    }
-
-    profileImage = "";
-    return {
-      "ok" : true
-    };
-  }
-
-  Future<Map<String, dynamic>> convertToPremium() async {
-    final uri = Uri.https(NailUtils.baseRoute, "user/premium/$id");
-    final req = await http.patch(uri);
-    final data = jsonDecode(req.body);
-
-    if (data["status"] != 200) {
-      return {
-        "ok" : false,
-        "error": data["error_msg"]
-      };
-    }
-
-    userType = 1;
-
-    return {
-      "ok" : true
-    };
   }
 
   Map<String ,dynamic> toJson() {

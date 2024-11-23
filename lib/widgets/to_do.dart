@@ -107,11 +107,11 @@ class ToDo extends StatelessWidget {
 
   bool _validTag(BuildContext context) {
     final tag = toDoModel.tag;
-    final isNotEmpty = tag != ""; 
+    final isNotEmpty = tag != 0; 
     final containsKey = tagsBloc.getTags.containsKey(tag);
 
-    if (tag != "" && !containsKey) {
-      toDoModel.tag = "";
+    if (tag != 0 && !containsKey) {
+      toDoModel.tag = 0;
       context.read<ToDoBloc>().editToDo(id, toDoModel);
     }
 

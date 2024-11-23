@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tarea/models/models.dart';
 
 class Tag extends StatelessWidget {
-  final String tagId;
+  final int tagId;
   final TagModel tag;
   const Tag({super.key, required this.tag, required this.tagId});
 

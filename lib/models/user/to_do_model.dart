@@ -9,7 +9,7 @@ class ToDoModel {
   String? description;
   late DateTime createdAt;
   DateTime deadLine;
-  String tag;
+  int tag;
   Color toDoColor;
 
   static bool isValidToDoName(String value) {
@@ -27,7 +27,7 @@ class ToDoModel {
   ToDoModel({
     required this.title, 
     required this.deadLine,
-    this.tag = "",
+    this.tag = 0,
     DateTime? createdAt,
     this.toDoColor = Colors.teal,
     this.description

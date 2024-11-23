@@ -1,13 +1,16 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
+import 'package:tarea/utils/utils.dart';
+import 'package:http/http.dart' as http;
 
 class TagModel {
+  final int id;
   final String title;
   final Color color;
-  const TagModel({required this.title, required this.color});
+  const TagModel({required this.title, required this.color, this.id = 0});
 
   static bool isValidTagName(String value) {
     const pattern = r"^(?:[A-Za-z]{3,15})?$";
@@ -24,55 +27,188 @@ class TagModel {
 
   TagModel.fromJson(Map<String, dynamic> json) 
     : title = json["title"] as String,
-      color = Color(json["color"] as int); 
+      color = Color(json["color"] as int),
+      id = json["id_tag"] as int; 
+}
+
+class TagDto {
+  late final String title;
+  late final Color color;
+  late final int createdBy;
+
+  TagDto(TagModel tag, int id) {
+    title = tag.title;
+    color = tag.color;
+    createdBy = id;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "title" : title,
+      "color" : color.value,
+      "created_by" : createdBy
+    };
+  }
+
+  TagDto.fromJson(Map<String, dynamic> json)
+    : title = json["title"],
+      color = Color(json["color"] as int),
+      createdBy = json["created_by"] as int;
 }
 
 class TagsModel {
-  Map<String, TagModel> _tags = {};
-  Map<String, TagModel> get getTags => _tags;
+  Map<int, TagModel> _tags = {};
+  Map<int, TagModel> get getTags => _tags;
 
-  TagsModel({Map<String, TagModel>? tags}) {
-    _tags = tags ?? <String, TagModel>{};
+  TagsModel({Map<int, TagModel>? tags}) {
+    _tags = tags ?? <int, TagModel>{};
   }
 
-  TagsModel removeTag(String id) {
-    if (!_tags.containsKey(id)) return this;
-    _tags.remove(id);
-    saveData();
-    return TagsModel(tags: _tags);
+  Future<Map<String, dynamic>> removeTag(int idTag, int idUser, TagModel t) async {
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "tags/delete/$idTag");
+      final res = await http.delete(uri, body: jsonEncode(<String, dynamic>{
+        "title" : t.title,
+        "color" : t.color.value,
+        "created_by" : idUser
+      }));
+
+      if (res.statusCode == 200) {
+        _tags.remove(idTag);
+
+        return {
+          "state" : copyWith(tags: _tags),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Cannot delete tag"
+      };
+    } catch (e) {
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Internal server error"
+      };
+    }
   }
 
-  TagsModel addTag(TagModel tag) {
-    const uuid = Uuid();
-    final id = uuid.v8();
-    if (!_tags.containsKey(id)) _tags[id] = tag;
+  Future<Map<String, dynamic>> addTag(TagModel t, int id) async {
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "tags/create");
+      final res = await http.post(uri, body: jsonEncode(<String, dynamic>{
+        "title" : t.title,
+        "color" : t.color.value,
+        "created_by" : id
+      }));
 
-    saveData();
-    return TagsModel(tags: _tags);
+      final data = jsonDecode(res.body);
+      final body = data["body"];
+      final tag = body["tag"];
+
+      if (res.statusCode == 201) {
+        _tags[body["id"]] = TagModel(title: tag["title"], color: Color(tag["color"] as int), id: body["id"]);
+
+        return {
+          "state" : copyWith(tags: _tags),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Cannot create tag"
+      };
+    } catch (e) {
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Internal server error"
+      };
+    }
   }
 
-  TagsModel editTag(String id, TagModel tag) {
-    if (!_tags.containsKey(id)) return this;
+  Future<Map<String, dynamic>> editTag(int idTag, int idUser, TagModel t) async {
+    try {
+      final uri = Uri.https(NailUtils.baseRoute, "tags/update/$idTag");
+      final res = await http.put(uri, body: jsonEncode(<String, dynamic>{
+        "title" : t.title,
+        "color" : t.color.value,
+        "created_by" : idUser
+      }));
 
-    _tags[id] = tag;
-    saveData();
-    return TagsModel(tags: _tags);
+      final data = jsonDecode(res.body);
+      final tag = data["body"];
+
+      if (res.statusCode == 200) {
+        _tags[idTag] = TagModel(title: tag["title"], color: Color(tag["color"] as int), id: idTag);
+
+        return {
+          "state" : copyWith(tags: _tags),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Cannot create tag"
+      };
+    } catch (e) {
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Internal server error"
+      };
+    }
   }
 
-  Future<void> saveData() async {
-    final json = jsonEncode(_tags);
-    final sh = await SharedPreferences.getInstance();
+  Future<Map<String, dynamic>> loadData(int userId) async {
+     try {
+      final uri = Uri.https(NailUtils.baseRoute, "tags/user/$userId");
+      final res = await http.get(uri);
 
-    sh.setString("tags", json);
-  }
+      final data = jsonDecode(res.body);
+      final body = data["body"];
 
-  Future<TagsModel> loadData() async {
-    final sh = await SharedPreferences.getInstance();
-    final data = sh.getString("tags");
-    if (data == null) return TagsModel();
+      for (int i = 0; i < (body as List<dynamic>).length; i++) {
+        final tag = body[i];
+        int id = tag["id"] as int;
 
-    final decoded = jsonDecode(data);
-    return TagsModel.fromJson(decoded);
+        _tags[id] = TagModel(
+          title: tag["title"], 
+          color: Color(tag["color"] as int),
+          id: id
+        );
+      }
+
+      if (res.statusCode == 200) {
+        return {
+          "state" : copyWith(tags: _tags),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Cannot create tag"
+      };
+    } catch (e) {
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Internal server error"
+      };
+    }
   }
 
   Future<TagsModel> clearData() async {
@@ -82,24 +218,15 @@ class TagsModel {
     return TagsModel();
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      "tags" : _tags
-    };
-  }
-  TagsModel.fromJson(Map<String, dynamic> json) {
-    _tags = {};
-    for (var entry in json.entries) {
-      final model = TagModel(title: entry.value["title"], color: Color(entry.value["color"]));
-      _tags[entry.key] = model;
-    }
+  TagsModel copyWith({Map<int, TagModel>? tags}) {
+    return TagsModel(tags: tags ?? _tags);
   }
 }
 
 class TagArguments {
   final bool isEditing;
   final TagModel? tag;
-  final String tagId;
+  final int tagId;
 
-  TagArguments({this.tagId = "",this.isEditing = false, this.tag});
+  TagArguments({this.tagId = 0,this.isEditing = false, this.tag});
 }

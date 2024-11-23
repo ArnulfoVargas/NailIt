@@ -1,29 +1,48 @@
 
+import 'dart:ffi';
+
 import 'package:bloc/bloc.dart';
 import 'package:tarea/models/models.dart';
 
 class TagsBloc extends Cubit<TagsModel> {
-  TagsBloc(super.initialState) {
-    loadData();
+  TagsBloc(super.initialState);
+
+  Map<int, TagModel> get getTags => state.getTags;
+
+  Future<Map<String, dynamic>> loadData(int idUser) async {
+    final res = await state.loadData(idUser);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 
-  Future<void> loadData() async {
-    final newState = await state.loadData();
-    emit(newState);
+  Future<Map<String, dynamic>> removeTag(int id, int idUser, TagModel tag) async {
+    final res = await state.removeTag(id, idUser, tag);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 
-  Map<String, TagModel> get getTags => state.getTags;
+  Future<Map<String, dynamic>> addTag(TagModel tag, int id) async {
+    final res = await state.addTag(tag, id);
+    final ok = res["ok"];
 
-  void removeTag(String id) {
-    emit(state.removeTag(id));
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 
-  void addTag(TagModel tag) {
-    emit(state.addTag(tag));
-  }
+  Future<Map<String, dynamic>> editTag(int id, int userId,TagModel tag) async {
+    final res = await state.editTag(id, userId, tag);
+    final ok = res["ok"];
 
-  void editTag(String id, TagModel tag) {
-    emit(state.editTag(id, tag));
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 
   Future<void> clearData() async {

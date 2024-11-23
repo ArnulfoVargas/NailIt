@@ -23,7 +23,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
   Color tagColor = Colors.red;
   String dateSelectedString = "";
   String tagTitle = "";
-  String tagSelected = "";
+  int tagSelected = 0;
   bool edited = false;
   bool nameHasError = false;
   bool descHasError = false;
@@ -31,7 +31,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
   bool showPreview = false;
   bool hasTags = false;
 
-  Map<String, TagModel> tags = {};
+  Map<int, TagModel> tags = {};
   DateTime? selectedDate;
 
 
@@ -305,7 +305,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
       );
   }
 
-  Widget _tagButton(MapEntry<String, TagModel> entry) {
+  Widget _tagButton(MapEntry<int, TagModel> entry) {
     final key = entry.key;
     final model = entry.value;
     return Padding(
@@ -318,7 +318,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
             tagSelected = key;
           } else {
             tagTitle = "";
-            tagSelected = "";
+            tagSelected = 0;
           }
           setState(() {});
         }, 
