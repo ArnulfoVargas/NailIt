@@ -59,6 +59,9 @@ class _AddToDoPageState extends State<AddToDoPage> {
         title.text = args.toDo!.title;
         description.text = args.toDo!.description ?? "";
         selectedColor = args.toDo!.toDoColor;
+        selectedDate = args.toDo!.deadLine;
+        tagSelected = args.toDo!.tag;
+        dateSelectedString = "${NailUtils.months[selectedDate!.month - 1]} ${selectedDate!.day}, ${selectedDate!.year}";
         edited = true;
       }
     }
@@ -168,6 +171,29 @@ class _AddToDoPageState extends State<AddToDoPage> {
                       ),
                     ],
                   ),
+
+                  if (args.isEditing)
+                    ElevatedButton(
+                      onPressed: () {
+                        _showConfirm(args);  
+                      }, 
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        elevation: 0,
+                        shadowColor: Colors.transparent
+                      ),
+                      child: const SizedBox(
+                        width: double.infinity,
+                        child: Text("Delete tag",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      )
+                    ),
                 ],
               ),
             ),
@@ -368,11 +394,99 @@ class _AddToDoPageState extends State<AddToDoPage> {
     );
 
     if (args.isEditing) {
-      
+      bloc.editToDo(args.toDoId, toDo);
     } else {
       bloc.addToDo(toDo);
     }
 
     Navigator.of(context).pop();
+  }
+
+  _showConfirm(ToDoArguments args) {
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Are you sure?",
+            style: TextStyle(
+              fontFamily: "Poppins",
+              fontWeight: FontWeight.bold,
+              color: Colors.black54
+            ),
+          ),
+          content: const Text("This action cannot be reversed"),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10))
+          ),
+          actions: [
+            CustomTextButton(
+              text: "Cancel", 
+              color: Colors.black54,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                _onDelete(args);
+              }, 
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.redAccent,
+                shadowColor: Colors.transparent
+              ),
+              child: const SizedBox(
+                child: Text("Delete",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              )
+            ),
+          ],
+        );
+      }
+    );
+  }
+  _onDelete(ToDoArguments args) async {
+    final bloc = context.read<ToDoBloc>();
+
+    if (args.isEditing) {
+      ToDoModel toDo = ToDoModel(
+        title: title.text,
+        deadLine: selectedDate!,
+        description: description.text,
+        tag: tagSelected,
+        toDoColor: selectedColor,
+        createdAt: args.toDo!.createdAt
+      );
+      final idUser = context.read<UserBloc>().state.id;
+
+      _doPop();
+
+      // NailUtils.showLoading(context);
+
+      /*final res = await*/ bloc.removeToDo(args.toDoId);
+
+      _doPop();
+
+      // _doPop();
+
+      // if (res["ok"]) {
+      //   _doPop();
+      // } else {
+      //   _doPop();
+
+      //   NailUtils.showError(context, res["error"]);
+      // }
+    }
+  }
+
+  _doPop() {
+      Navigator.of(context).pop();
   }
 }

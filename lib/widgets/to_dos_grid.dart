@@ -15,6 +15,9 @@ class ToDosGrid extends StatelessWidget {
 
     const double spacing = 10; 
 
+    final crossAxisCount = toDoBloc.getToDos.entries.length < 3 ? 1 : 2;
+    final containerSize = crossAxisCount == 1 ? 112.5 : 225.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,13 +32,13 @@ class ToDosGrid extends StatelessWidget {
         ),
         SizedBox(
           width: double.infinity,
-          height: 225,
+          height: containerSize,
           child: ScrollConfiguration(
             behavior: AppScrollBehavior(),
             child: GridView(
               physics: const BouncingScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
                 mainAxisSpacing: spacing,
                 crossAxisSpacing: spacing,
                 childAspectRatio: .65

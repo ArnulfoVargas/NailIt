@@ -1,3 +1,5 @@
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
@@ -6,6 +8,8 @@ import 'package:tarea/router/router.dart';
 import 'package:tarea/utils/utils.dart';
 
 void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const BlocsProvider());
 }
 

@@ -43,6 +43,7 @@ dependencies:
   omni_datetime_picker: ^2.0.5
   shared_preferences: ^2.3.2
   uuid: ^4.5.1
+  flutter_native_splash: ^2.4.3
 
 dev_dependencies:
 
@@ -96,3 +97,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_native_splash:
+  color: "#229799"
+  image: images/LogoNailItI.png
+  fullscreen: true

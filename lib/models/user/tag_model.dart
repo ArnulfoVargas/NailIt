@@ -11,7 +11,7 @@ class TagModel {
   const TagModel({required this.title, required this.color, this.id = 0});
 
   static bool isValidTagName(String value) {
-    const pattern = r"^(?:[A-Za-z]{3,15})?$";
+    const pattern = r"^(?:[A-Za-z ]{3,15})?$";
     final regex = RegExp(pattern);
     return value.isNotEmpty && regex.hasMatch(value);
   }

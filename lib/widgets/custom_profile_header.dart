@@ -114,6 +114,9 @@ class CustomProfileHeader extends StatelessWidget {
               color: Colors.black54
             ),
           ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10))
+          ),
           content: const Text("Select an image from"),
           actions: [
             Column(

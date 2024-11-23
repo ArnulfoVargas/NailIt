@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/models/models.dart';
+import 'package:tarea/utils/utils.dart';
+import 'package:tarea/widgets/widgets.dart';
 
 class ToDo extends StatelessWidget {
   final ToDoModel toDoModel;
@@ -27,7 +29,9 @@ class ToDo extends StatelessWidget {
         ]
       ),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          _showDescription(context);
+        },
         splashColor: Colors.black12,
         highlightColor: Colors.black12.withOpacity(.15),
         borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -103,6 +107,98 @@ class ToDo extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showDescription(BuildContext context) {
+    final date = toDoModel.deadLine;
+    final dateFormated = "${NailUtils.months[date.month]} ${date.day}, ${date.year}";
+    final containsKey = tagsBloc.getTags.containsKey(toDoModel.tag);
+
+    TagModel? tag = const TagModel(title: "", color: Colors.white);
+
+    if (containsKey) {
+      tag = tagsBloc.getTags[toDoModel.tag];
+    }
+
+    showDialog(
+      barrierDismissible: true,
+      context: context, 
+      builder: (ctx) => AlertDialog(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(toDoModel.title,
+              style: const TextStyle(
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.bold,
+                color: Colors.black54
+              ),
+            ),
+
+
+            if (containsKey)
+              Container(
+                margin: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  color: tag!.color,
+                ),
+
+                child: Text(tag.title,
+                  style: TextStyle(
+                    color: NailUtils.getContrastColor(tag.color),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              ),
+          ],
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10))
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text("Deadline: ", style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text(dateFormated),
+                ],
+              ) ,
+
+              if (toDoModel.description != null)
+                Text(toDoModel.description ?? ""),
+            ],
+          ),
+        ),
+
+        actions: [
+          CustomTextButton(
+            text: "Cerrar", 
+            color: Colors.redAccent,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+
+          CustomTextButton(
+            text: "Editar", 
+            color: const Color(0xFF229799),
+            onPressed: () {
+              _pressedEdit(context);
+            },
+          )
+        ],
+      )
+    );
+  }
+
+  void _pressedEdit(BuildContext context) {
+    Navigator.of(context).pop();
+    Navigator.of(context).pushNamed("add_todo", arguments: ToDoArguments(isEditing: true, toDoId: id, toDo: toDoModel));
   }
 
   bool _validTag(BuildContext context) {
