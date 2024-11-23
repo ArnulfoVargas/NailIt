@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/models/models.dart';
+import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class ProfileEditPage extends StatelessWidget {
@@ -70,6 +71,7 @@ class _EditFormState extends State<_EditForm> {
     return Column(
       children: [
         CustomInput(
+          enabled: !isValidating,
           onChanged: _validateUser,
           controller: userController,
           autocorrect: true,
@@ -80,6 +82,7 @@ class _EditFormState extends State<_EditForm> {
         ),
     
         CustomInput(
+          enabled: !isValidating,
           onChanged: _validatePhone,
           controller: phoneController,
           autocorrect: true,
@@ -91,6 +94,7 @@ class _EditFormState extends State<_EditForm> {
         ),
     
         CustomInput(
+          enabled: !isValidating,
           onChanged: _validateMail,
           controller: mailController,
           autocorrect: true,
@@ -102,6 +106,7 @@ class _EditFormState extends State<_EditForm> {
         ),
     
         CustomInput(
+          enabled: !isValidating,
           onChanged: _validatePass,
           controller: passController,
           autocorrect: false,
@@ -234,6 +239,8 @@ class _EditFormState extends State<_EditForm> {
 
     if (!hasModifications) {
       _showAddChagesAlert();
+      isValidating = false;
+      setState(() {});
       return;
     }
 
@@ -248,7 +255,7 @@ class _EditFormState extends State<_EditForm> {
       isValidating = false;
       setState(() {});
 
-      _showError(context, result["error"]);
+      NailUtils.showError(context, result["error"]);
       return;
     }
 
@@ -333,27 +340,5 @@ class _EditFormState extends State<_EditForm> {
                         !validations.passwordIsValid ||
                         !validations.passwordConfirmIsValid ||
                         !validations.phoneIsValid;
-  }
-
-  _showError(BuildContext context, String errorMsg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color.fromARGB(255, 252, 49, 49),
-        dismissDirection: DismissDirection.down,
-        behavior: SnackBarBehavior.floating,
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-        elevation: 2,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10))
-        ),
-        content: Text(errorMsg,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            fontWeight: FontWeight.bold
-          ),
-        ),
-      )
-    );
   }
 }

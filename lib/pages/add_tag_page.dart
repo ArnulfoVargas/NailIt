@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/models/models.dart';
+import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class AddTagPage extends StatefulWidget {
@@ -167,7 +168,7 @@ class _AddTagPageState extends State<AddTagPage> {
     setState(() {});
   }
 
-  _onAppy(TagArguments args) {
+  _onAppy(TagArguments args) async {
     _onChangeNameInput(nameController.text);
     if (nameHasErrors) return;
 
@@ -178,16 +179,25 @@ class _AddTagPageState extends State<AddTagPage> {
       color: selectedColor
     );
 
+    NailUtils.showLoading(context);
+    Map<String, dynamic> res;
+
     if (args.isEditing) {
-      bloc.editTag(args.tagId, id, tag);
+      res = await bloc.editTag(args.tagId, id, tag);
     } else {
-      bloc.addTag(tag, id);
+      res = await bloc.addTag(tag, id);
     }
 
-    Navigator.of(context).pop();
+    if (res["ok"]) {
+      _doPop();
+      _doPop();
+    } else {
+      _doPop();
+      NailUtils.showError(context, res["error"]);
+    }
   }
 
-  _onDelete(TagArguments args) {
+  _onDelete(TagArguments args) async {
     final bloc = context.read<TagsBloc>();
 
     TagModel tag = TagModel(
@@ -196,9 +206,27 @@ class _AddTagPageState extends State<AddTagPage> {
     );
     if (args.isEditing) {
       final id = context.read<UserBloc>().state.id;
-      bloc.removeTag(args.tagId, id, tag);
-      Navigator.of(context).pop();
+
+      _doPop();
+
+      NailUtils.showLoading(context);
+
+      final res = await bloc.removeTag(args.tagId, id, tag);
+
+      _doPop();
+
+      if (res["ok"]) {
+        _doPop();
+      } else {
+        _doPop();
+
+        NailUtils.showError(context, res["error"]);
+      }
     }
+  }
+
+  _doPop() {
+      Navigator.of(context).pop();
   }
 
   _showConfirm(TagArguments args) {
@@ -228,7 +256,6 @@ class _AddTagPageState extends State<AddTagPage> {
 
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
                 _onDelete(args);
               }, 
               style: ElevatedButton.styleFrom(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -92,7 +93,12 @@ class CustomProfileHeader extends StatelessWidget {
       return icon;
     }
 
-    return Image(image: NetworkImage(path),);
+    return CachedNetworkImage(
+       imageUrl: path,
+       progressIndicatorBuilder: (context, url, downloadProgress) => 
+               CircularProgressIndicator(value: downloadProgress.progress, strokeWidth: 5, color: const Color(0xFF229799),),
+       errorWidget: (context, url, error) => icon,
+    );
   }
 
   _showPictureDialog(BuildContext topContext) {

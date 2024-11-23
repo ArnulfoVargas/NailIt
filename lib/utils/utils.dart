@@ -95,4 +95,56 @@ class NailUtils {
     'November',
     'December'
   ];
+
+  static showError(BuildContext context, String errorMsg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color.fromARGB(255, 252, 49, 49),
+        dismissDirection: DismissDirection.down,
+        behavior: SnackBarBehavior.floating,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        elevation: 2,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10))
+        ),
+        content: Text(errorMsg,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+          ),
+        ),
+      )
+    );
+  }
+
+  static showLoading(BuildContext context) {
+    showDialog(
+      context: context, 
+      barrierDismissible: false,
+      useSafeArea: true,
+      builder: (ctx) => const AlertDialog(
+        title: Text("Please wait",
+          style: TextStyle(
+            fontFamily: "Poppins",
+            fontWeight: FontWeight.bold,
+            color: Colors.black54
+          ),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10))
+        ),
+        content: SizedBox(
+          height: 50,
+          width: 50,
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 5,
+              color: Color(0xFF229799),
+            ),
+          )
+        ),
+      )
+    );
+  }
 }

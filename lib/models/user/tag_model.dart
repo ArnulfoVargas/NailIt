@@ -71,7 +71,7 @@ class TagsModel {
         "title" : t.title,
         "color" : t.color.value,
         "created_by" : idUser
-      }));
+      })).timeout(const Duration(seconds: 5));
 
       if (res.statusCode == 200) {
         _tags.remove(idTag);
@@ -104,7 +104,7 @@ class TagsModel {
         "title" : t.title,
         "color" : t.color.value,
         "created_by" : id
-      }));
+      })).timeout(const Duration(seconds: 5));
 
       final data = jsonDecode(res.body);
       final body = data["body"];
@@ -141,7 +141,7 @@ class TagsModel {
         "title" : t.title,
         "color" : t.color.value,
         "created_by" : idUser
-      }));
+      })).timeout(const Duration(seconds: 5));
 
       final data = jsonDecode(res.body);
       final tag = data["body"];
@@ -173,7 +173,7 @@ class TagsModel {
   Future<Map<String, dynamic>> loadData(int userId) async {
      try {
       final uri = Uri.https(NailUtils.baseRoute, "tags/user/$userId");
-      final res = await http.get(uri);
+      final res = await http.get(uri).timeout(const Duration(seconds: 5));
 
       final data = jsonDecode(res.body);
       final body = data["body"];

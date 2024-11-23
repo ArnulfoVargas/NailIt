@@ -12,6 +12,7 @@ class CustomInput extends StatelessWidget {
   final IconData? icon;
   final Function(String)? onChanged;
   final Widget? suffixIcon;
+  final bool? enabled;
 
   const CustomInput({
     super.key, 
@@ -25,7 +26,7 @@ class CustomInput extends StatelessWidget {
     this.inputType = TextInputType.text,
     this.onChanged,
     this.maxLenght, 
-    required this.controller, 
+    required this.controller, this.enabled, 
   });
 
   @override
@@ -48,6 +49,7 @@ class CustomInput extends StatelessWidget {
               ]
             ),
             child: TextField(
+              enabled: enabled,
               onChanged: onChanged,
               controller: controller,
               autocorrect: autocorrect,

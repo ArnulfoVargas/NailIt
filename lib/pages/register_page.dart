@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/models/models.dart';
+import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -55,6 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 20,),
                       
                   CustomInput(
+                    enabled: !isValidating,
                     onChanged: _validateUser,
                     controller: userController,
                     autocorrect: true,
@@ -65,6 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
               
                   CustomInput(
+                    enabled: !isValidating,
                     onChanged: _validatePhone,
                     controller: phoneController,
                     autocorrect: true,
@@ -76,6 +79,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
               
                   CustomInput(
+                    enabled: !isValidating,
                     onChanged: _validateMail,
                     controller: mailController,
                     autocorrect: true,
@@ -87,6 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                       
                   CustomInput(
+                    enabled: !isValidating,
                     onChanged: _validateMailConfirm,
                     controller: mailConfirmController,
                     autocorrect: true,
@@ -98,6 +103,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                       
                   CustomInput(
+                    enabled: !isValidating,
                     onChanged: _validatePass,
                     controller: passController,
                     autocorrect: false,
@@ -118,6 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                       
                   CustomInput(
+                    enabled: !isValidating,
                     onChanged: _validatePassConfirm,
                     controller: passConfirmController,
                     autocorrect: false,
@@ -194,8 +201,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
     else {
       isValidating = false;
-      print(result);
-      _showError(context, result["error"]);
+      NailUtils.showError(context, result["error"]);
       setState(() {});
     }
   }
@@ -268,27 +274,5 @@ class _RegisterPageState extends State<RegisterPage> {
                         !validations.passwordIsValid ||
                         !validations.passwordConfirmIsValid ||
                         !validations.phoneIsValid;
-  }
-
-  _showError(BuildContext context, String errorMsg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color.fromARGB(255, 252, 49, 49),
-        dismissDirection: DismissDirection.down,
-        behavior: SnackBarBehavior.floating,
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-        elevation: 2,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10))
-        ),
-        content: Text(errorMsg,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            fontWeight: FontWeight.bold
-          ),
-        ),
-      )
-    );
   }
 }

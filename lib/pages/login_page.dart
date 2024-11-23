@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
       _navigateToHome();
     } else {
       isValidating = false;
-      _showError(context, result["error"]);
+      NailUtils.showError(context, result["error"]);
       setState(() {});
     }
   }
@@ -159,26 +159,5 @@ class _LoginPageState extends State<LoginPage> {
   _updateHasErrors() {
     validations.hasErrors = !validations.mailIsValid ||
                         !validations.passwordIsValid;
-  }
-   _showError(BuildContext context, String errorMsg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color.fromARGB(255, 252, 49, 49),
-        dismissDirection: DismissDirection.down,
-        behavior: SnackBarBehavior.floating,
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-        elevation: 2,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10))
-        ),
-        content: Text(errorMsg,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            fontWeight: FontWeight.bold
-          ),
-        ),
-      )
-    );
   }
 }
