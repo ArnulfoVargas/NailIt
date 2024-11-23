@@ -25,7 +25,7 @@ class ToDoBloc extends Cubit<ToDosModel>{
     emit(state.editToDo(id, toDo));
   }
 
-  Future<void> clearData() async {
+  Future<void> clearData(int id) async {
     emit(await state.clearData());
   }
 }

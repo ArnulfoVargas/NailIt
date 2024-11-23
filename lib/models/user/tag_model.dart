@@ -211,11 +211,31 @@ class TagsModel {
     }
   }
 
-  Future<TagsModel> clearData() async {
-    final sh = await SharedPreferences.getInstance();
-    sh.remove("tags");
+  Future<Map<String, dynamic>> clearData(int userId) async {
+     try {
+      final uri = Uri.https(NailUtils.baseRoute, "tags/delete/user/$userId");
+      final res = await http.delete(uri).timeout(const Duration(seconds: 5));
 
-    return TagsModel();
+      if (res.statusCode == 200) {
+        return {
+          "state" : copyWith(tags: {}),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Couldnt delete tags"
+      };
+    } catch (e) {
+      return {
+        "state" : this,
+        "ok" : false,
+        "error" : "Internal server error"
+      };
+    }
   }
 
   TagsModel copyWith({Map<int, TagModel>? tags}) {

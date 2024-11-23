@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
+import 'package:tarea/utils/utils.dart';
 import 'package:tarea/widgets/widgets.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -48,7 +49,8 @@ class SettingsPage extends StatelessWidget {
               title: "Delete to do's", 
               icon: Icons.assignment_late_rounded,
               onTap: () async {
-                await context.read<ToDoBloc>().clearData();
+                final id = context.read<UserBloc>().state.id;
+                await context.read<ToDoBloc>().clearData(id);
               }
             ),
 
@@ -56,7 +58,15 @@ class SettingsPage extends StatelessWidget {
               title: "Delete tags", 
               icon: Icons.label_off,
               onTap: () async {
-                await context.read<TagsBloc>().clearData();
+                final id = context.read<UserBloc>().state.id;
+                NailUtils.showLoading(context);
+                final res = await context.read<TagsBloc>().clearData(id);
+                if (res["ok"]) {
+                  Navigator.of(context).pop();
+                } else {
+                  Navigator.of(context).pop();
+                  NailUtils.showError(context, res["error"]);
+                }
               }
             ),
 

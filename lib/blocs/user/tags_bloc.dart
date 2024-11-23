@@ -45,7 +45,12 @@ class TagsBloc extends Cubit<TagsModel> {
     return res;
   }
 
-  Future<void> clearData() async {
-    emit(await state.clearData());
+  Future<Map<String, dynamic>> clearData(int id) async {
+    final res = await state.clearData(id);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 }
