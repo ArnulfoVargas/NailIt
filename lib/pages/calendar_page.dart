@@ -102,16 +102,17 @@ class CalendarPage extends StatelessWidget {
           // hideArrows: true,
           locale: 'en-Eu',
           eventsList: [
-            ...toDoBloc.getToDos.entries.map((entry) {
-              return NeatCleanCalendarEvent(
-                entry.value.title, 
-                id: entry.key,
-                description: entry.value.description ?? "",
-                startTime: entry.value.deadLine, 
-                endTime: entry.value.deadLine,
-                color: entry.value.toDoColor,
-                isAllDay: true,
-              );
+            if (toDoBloc.getToDos.containsKey(0))
+              ...toDoBloc.getToDos[0]!.entries.map((entry) {
+                return NeatCleanCalendarEvent(
+                  entry.value.title, 
+                  id: entry.value.id.toString(),
+                  description: entry.value.description ?? "",
+                  startTime: entry.value.deadLine, 
+                  endTime: entry.value.deadLine,
+                  color: entry.value.toDoColor,
+                  isAllDay: true,
+                );
             })
           ],
         

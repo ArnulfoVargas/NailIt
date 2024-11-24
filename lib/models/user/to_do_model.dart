@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
+import 'package:tarea/models/models.dart';
+import 'package:tarea/utils/utils.dart';
+import 'package:http/http.dart' as http;
 
 class ToDoModel {
+  int id = 0;
   String title;
   String? description;
-  late DateTime createdAt;
   DateTime deadLine;
   int tag;
   Color toDoColor;
@@ -28,14 +30,10 @@ class ToDoModel {
     required this.title, 
     required this.deadLine,
     this.tag = 0,
-    DateTime? createdAt,
+    this.id = 0,
     this.toDoColor = Colors.teal,
-    this.description
-  }) {
-    DateTime now = DateTime.now();
-
-    this.createdAt = createdAt ?? DateTime(now.year, now.month, now.day);
-  }
+    this.description,
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -44,52 +42,141 @@ class ToDoModel {
       "deadline" : deadLine.millisecondsSinceEpoch,
       "tag" : tag,
       "color" : toDoColor.value,
-      "created_at" : createdAt.millisecondsSinceEpoch,
     };
   }
 
   ToDoModel.fromJson(Map<String, dynamic> json) : 
     title = json["title"], 
-    deadLine = DateTime.fromMillisecondsSinceEpoch(json["deadline"]),
+    deadLine = DateTime.parse(json["deadline"]),
     description = json["description"],
-    toDoColor = Color(json["color"]),
-    createdAt = DateTime.fromMillisecondsSinceEpoch(json["created_at"]),
-    tag = json["tag"];
+    toDoColor = Color(json["color"] as int),
+    tag = json["tag"] as int;
 }
 
 class ToDosModel {
-  Map<String, ToDoModel> _todos = {};
-  Map<String, ToDoModel> get getToDos => _todos;
+  Map<int, Map<int, ToDoModel>> _todos = {};
+  Map<int, Map<int, ToDoModel>> get getToDos => _todos;
 
-  ToDosModel({Map<String, ToDoModel>? todos}) {
-    _todos = todos ?? <String,ToDoModel>{};
+  ToDosModel({Map<int, Map<int, ToDoModel>>? todos}) {
+    _todos = todos ?? <int, Map<int,ToDoModel>>{};
   }
 
-  ToDosModel editToDo(String id, ToDoModel toDo) {
-    if (!_todos.containsKey(id)) return this;
+  Future<Map<String, dynamic>> editToDo(int id, int userId, ToDoModel toDo) async {
+    try{
+      final uri = Uri.https(NailUtils.baseRoute, "todos/update/$id");
+      final res = await http.put(uri, body: jsonEncode(
+        <String, dynamic> {
+          "title" : toDo.title,
+          "description" : toDo.description ?? "",
+          "tag" : toDo.tag,
+          "color" : toDo.toDoColor.value,
+          "created_by" : userId,
+          "deadline" : toDo.deadLine.millisecondsSinceEpoch
+        }
+      )).timeout(const Duration(seconds: 5));
 
-    _todos[id] = toDo;
-    saveData();
-    return ToDosModel(todos: _todos);
-  }
+      final data = jsonDecode(res.body);
+      final body = data["body"];
 
-  ToDosModel addToDo(ToDoModel toDo) {
-    const uuid = Uuid();
-    final id = uuid.v8();
-    if (!_todos.containsKey(id)) {
-      _todos[id] = toDo;
+      if (res.statusCode == 200) {
+        ToDoModel newTodo = ToDoModel.fromJson(body);
+        newTodo.id = id;
+        _updateToDosMap(toDo, newTodo: newTodo);
+
+        return {
+          "state" : ToDosModel(todos: _todos),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "ok" : false,
+        "error" : "cannot create"
+      };
+    } catch(e) {
+      return {
+        "ok" : false,
+        "error" : "unexpected error"
+      };
     }
-    saveData();
-
-    return ToDosModel(todos: _todos);
   }
 
-  ToDosModel removeToDo(String id) {
-    if (!_todos.containsKey(id)) return this;
+//{id: 3, tag: {title: example, description: , color: 4294930176, deadline: 2024-11-24T22:44:15.544Z, tag: 0, created_by: 1}}
+  Future<Map<String, dynamic>> addToDo(ToDoModel toDo, int userId) async {
+    try{
+      final uri = Uri.https(NailUtils.baseRoute, "todos/create");
+      final res = await http.post(uri, body: jsonEncode(
+        <String, dynamic> {
+          "title" : toDo.title,
+          "description" : toDo.description ?? "",
+          "tag" : toDo.tag,
+          "color" : toDo.toDoColor.value,
+          "created_by" : userId,
+          "deadline" : toDo.deadLine.millisecondsSinceEpoch
+        }
+      )).timeout(const Duration(seconds: 5));
 
-    _todos.remove(id);
-    saveData();
-    return ToDosModel(todos: _todos);
+      final data = jsonDecode(res.body);
+
+      if (res.statusCode == 201) {
+        toDo.id = data["body"]["id"];
+
+        _updateToDosMap(toDo);
+
+        return {
+          "state" : ToDosModel(todos: _todos),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "ok" : false,
+        "error" : "cannot create"
+      };
+    } catch(e) {
+      return {
+        "ok" : false,
+        "error" : "unexpected error"
+      };
+    }
+  }
+
+  Future<Map<String,dynamic>> removeToDo(int id, int userId, ToDoModel toDo) async {
+    try{
+      final uri = Uri.https(NailUtils.baseRoute, "todos/delete/$id");
+      final res = await http.delete(uri, body: jsonEncode(
+        <String, dynamic> {
+          "title" : toDo.title,
+          "description" : toDo.description ?? "",
+          "tag" : toDo.tag,
+          "color" : toDo.toDoColor.value,
+          "created_by" : userId,
+          "deadline" : toDo.deadLine.millisecondsSinceEpoch
+        }
+      )).timeout(const Duration(seconds: 5));
+
+      if (res.statusCode == 200) {
+        _updateToDosMap(toDo, delete: true);
+
+        return {
+          "state" : ToDosModel(todos: _todos),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "ok" : false,
+        "error" : "cannot create"
+      };
+    } catch(e) {
+      return {
+        "ok" : false,
+        "error" : "unexpected error"
+      };
+    }
   }
 
   Future<void> saveData() async {
@@ -99,40 +186,60 @@ class ToDosModel {
   }
 
   Future<ToDosModel> clearData() async {
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    sh.remove("todos");
+
 
     return ToDosModel();
   }
 
   Future<ToDosModel> loadData() async {
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    final jsonString = sh.getString("todos");
-    if (jsonString == null) return ToDosModel();
-    final json = jsonDecode(jsonString);
-    return ToDosModel.fromJson(json);
+    // SharedPreferences sh = await SharedPreferences.getInstance();
+    // final jsonString = sh.getString("todos");
+    // if (jsonString == null) return ToDosModel();
+    // final json = jsonDecode(jsonString);
+    return ToDosModel();
   }
 
-  ToDosModel.fromJson(Map<String, dynamic> json) {
-    _todos = {};
-    for(var entry in json.entries) {
-      final todo = ToDoModel(
-        title: entry.value["title"], 
-        description: entry.value["description"],
-        tag: entry.value["tag"],
-        toDoColor: Color(entry.value["color"]),
-        deadLine: DateTime.fromMillisecondsSinceEpoch(entry.value["deadline"]),
-        createdAt: DateTime.fromMillisecondsSinceEpoch(entry.value["created_at"]),
-      );
+  _updateToDosMap(ToDoModel oldTodo, {bool delete = false, ToDoModel? newTodo}) {
+    final oldTodoTag = oldTodo.tag;
+    final oldTodoId = oldTodo.id;
+    final newTodoTag = newTodo != null ? newTodo.tag : 0;
+    final newTodoId = newTodo != null ? newTodo.id : 0;
 
-      _todos[entry.key] = todo;
+    if (delete) {
+      if (_todos.containsKey(0)) {
+        _todos[0]!.remove(oldTodoId);
+      }
+      if (_todos.containsKey(oldTodoTag) && oldTodoTag != 0) {
+        _todos[oldTodoTag]!.remove(oldTodoTag);
+      }
+    } else {
+      if (newTodo != null) {
+        if (!_todos.containsKey(0)) {
+          _todos[0] = <int, ToDoModel>{};
+        }
+        if (!_todos.containsKey(newTodoTag)) {
+          _todos[newTodoTag] = <int, ToDoModel>{};
+        }
+
+        _todos[0]![newTodoId] = newTodo;
+        _todos[newTodoTag]![newTodoId] = newTodo;
+      } else {
+        if (!_todos.containsKey(0)) {
+          _todos[0] = <int, ToDoModel>{};
+        }
+        if (!_todos.containsKey(oldTodoTag)) {
+          _todos[oldTodoTag] = <int, ToDoModel>{};
+        }
+        _todos[0]![oldTodoId] = oldTodo;
+        _todos[oldTodoTag]![oldTodoId] = oldTodo;
+      }
     }
   }
 }
 class ToDoArguments {
   final bool isEditing;
   final ToDoModel? toDo;
-  final String toDoId;
+  final int toDoId;
 
-  ToDoArguments({this.toDoId = "",this.isEditing = false, this.toDo});
+  ToDoArguments({this.toDoId = 0,this.isEditing = false, this.toDo});
 }

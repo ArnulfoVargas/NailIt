@@ -6,23 +6,38 @@ class ToDoBloc extends Cubit<ToDosModel>{
     loadData();
   }
 
-  Map<String, ToDoModel> get getToDos => state.getToDos;
+  Map<int, Map<int, ToDoModel>> get getToDos => state.getToDos;
 
   Future<void> loadData() async {
     final newState = await state.loadData();
     emit(newState);
   }
 
-  void addToDo(ToDoModel toDo) {
-    emit(state.addToDo(toDo));
+  Future<Map<String, dynamic>> addToDo(ToDoModel toDo, int idUser) async {
+    final res = await state.addToDo(toDo, idUser);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 
-  void removeToDo(String id) {
-    emit(state.removeToDo(id));
+  Future<Map<String, dynamic>> removeToDo(int id, int userId, ToDoModel toDo) async {
+    final res = await state.removeToDo(id, userId, toDo);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 
-  void editToDo(String id, ToDoModel toDo) {
-    emit(state.editToDo(id, toDo));
+  Future<Map<String, dynamic>> editToDo(int id, int userId,ToDoModel toDo) async {
+    final res = await state.editToDo(id, userId, toDo);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 
   Future<void> clearData(int id) async {

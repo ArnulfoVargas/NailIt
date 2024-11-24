@@ -376,7 +376,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
     setState(() {});
   }
   
-  void _onAppy(ToDoArguments args) {
+  void _onAppy(ToDoArguments args) async {
     nameHasError = !ToDoModel.isValidToDoName(title.text);
     descHasError = !ToDoModel.isValidDescription(description.text);
     dateHasError = selectedDate == null;
@@ -385,6 +385,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
     if (dateHasError || descHasError || nameHasError) return;
 
     final bloc = context.read<ToDoBloc>();
+    final userBloc = context.read<UserBloc>();
     final toDo = ToDoModel(
       title: title.text, 
       deadLine: selectedDate!,
@@ -393,13 +394,22 @@ class _AddToDoPageState extends State<AddToDoPage> {
       tag: tagSelected,
     );
 
+    Map<String, dynamic> res = <String, dynamic>{};
+
+    NailUtils.showLoading(context);
     if (args.isEditing) {
-      bloc.editToDo(args.toDoId, toDo);
+      res = await bloc.editToDo(args.toDoId, userBloc.state.id ,toDo);
     } else {
-      bloc.addToDo(toDo);
+      res = await bloc.addToDo(toDo, userBloc.state.id);
     }
 
-    Navigator.of(context).pop();
+    if (res["ok"]) {
+      _doPop();
+    } else {
+      NailUtils.showError(context, res["error"]);
+    }
+
+    _doPop();
   }
 
   _showConfirm(ToDoArguments args) {
@@ -455,34 +465,26 @@ class _AddToDoPageState extends State<AddToDoPage> {
   _onDelete(ToDoArguments args) async {
     final bloc = context.read<ToDoBloc>();
 
+    if (args.toDo == null ) return;
+
     if (args.isEditing) {
-      ToDoModel toDo = ToDoModel(
-        title: title.text,
-        deadLine: selectedDate!,
-        description: description.text,
-        tag: tagSelected,
-        toDoColor: selectedColor,
-        createdAt: args.toDo!.createdAt
-      );
       final idUser = context.read<UserBloc>().state.id;
 
       _doPop();
 
-      // NailUtils.showLoading(context);
+      NailUtils.showLoading(context);
 
-      /*final res = await*/ bloc.removeToDo(args.toDoId);
+      final res = await bloc.removeToDo(args.toDoId, idUser, args.toDo!);
 
       _doPop();
 
-      // _doPop();
+      if (res["ok"]) {
+        _doPop();
+      } else {
+        _doPop();
 
-      // if (res["ok"]) {
-      //   _doPop();
-      // } else {
-      //   _doPop();
-
-      //   NailUtils.showError(context, res["error"]);
-      // }
+        NailUtils.showError(context, res["error"]);
+      }
     }
   }
 

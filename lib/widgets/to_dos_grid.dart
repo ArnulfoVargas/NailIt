@@ -14,8 +14,12 @@ class ToDosGrid extends StatelessWidget {
     final tagsBloc = context.watch<TagsBloc>();
 
     const double spacing = 10; 
+    bool singleCount = false;
 
-    final crossAxisCount = toDoBloc.getToDos.entries.length < 3 ? 1 : 2;
+    if (toDoBloc.getToDos.containsKey(0)) {
+      singleCount = toDoBloc.getToDos[0]!.entries.length < 3;
+    }
+    final crossAxisCount = singleCount ? 1 : 2;
     final containerSize = crossAxisCount == 1 ? 112.5 : 225.0;
 
     return Column(
@@ -46,13 +50,14 @@ class ToDosGrid extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               scrollDirection: Axis.horizontal, 
               children: [
-                ...toDoBloc.getToDos.entries.map((entry) {
-                  return ToDo(
-                    id: entry.key,
-                    toDoModel: entry.value,
-                    tagsBloc: tagsBloc,
-                  );
-                })
+                if (toDoBloc.getToDos.containsKey(0))
+                  ...toDoBloc.getToDos[0]!.entries.map((entry) {
+                    return ToDo(
+                      id: entry.value.id,
+                      toDoModel: entry.value,
+                      tagsBloc: tagsBloc,
+                    );
+                  })
               ],
             ),
           ),

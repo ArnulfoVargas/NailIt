@@ -8,7 +8,7 @@ import 'package:tarea/widgets/widgets.dart';
 class ToDo extends StatelessWidget {
   final ToDoModel toDoModel;
   final TagsBloc tagsBloc;
-  final String id;
+  final int id;
   const ToDo({super.key, required this.toDoModel, required this.id, required this.tagsBloc});
 
   @override
@@ -208,7 +208,6 @@ class ToDo extends StatelessWidget {
 
     if (tag != 0 && !containsKey) {
       toDoModel.tag = 0;
-      context.read<ToDoBloc>().editToDo(id, toDoModel);
     }
 
     return isNotEmpty && containsKey;
