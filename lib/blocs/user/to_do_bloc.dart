@@ -2,15 +2,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/models/models.dart';
 
 class ToDoBloc extends Cubit<ToDosModel>{
-  ToDoBloc(super.initialState) {
-    loadData();
-  }
+  ToDoBloc(super.initialState);
 
   Map<int, Map<int, ToDoModel>> get getToDos => state.getToDos;
 
-  Future<void> loadData() async {
-    final newState = await state.loadData();
-    emit(newState);
+  Future<Map<String, dynamic>> loadData(int idUser) async {
+    final res = await state.loadData(idUser);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
+  }
+
+  void emptyToDos() {
+    emit(state.emptyToDos());
   }
 
   Future<Map<String, dynamic>> addToDo(ToDoModel toDo, int idUser) async {
@@ -31,8 +37,8 @@ class ToDoBloc extends Cubit<ToDosModel>{
     return res;
   }
 
-  Future<Map<String, dynamic>> editToDo(int id, int userId,ToDoModel toDo) async {
-    final res = await state.editToDo(id, userId, toDo);
+  Future<Map<String, dynamic>> editToDo(int id, int userId, int prevTag, ToDoModel toDo) async {
+    final res = await state.editToDo(id, userId, prevTag, toDo);
     final ok = res["ok"];
 
     emit(ok ? res["state"] : state);
@@ -40,7 +46,12 @@ class ToDoBloc extends Cubit<ToDosModel>{
     return res;
   }
 
-  Future<void> clearData(int id) async {
-    emit(await state.clearData());
+  Future<Map<String, dynamic>> clearData(int userId) async {
+    final res = await state.clearData(userId);
+    final ok = res["ok"];
+
+    emit(ok ? res["state"] : state);
+
+    return res;
   }
 }

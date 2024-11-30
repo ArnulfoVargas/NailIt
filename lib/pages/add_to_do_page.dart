@@ -398,7 +398,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
 
     NailUtils.showLoading(context);
     if (args.isEditing) {
-      res = await bloc.editToDo(args.toDoId, userBloc.state.id ,toDo);
+      res = await bloc.editToDo(args.toDoId, userBloc.state.id, args.toDo!.tag,toDo);
     } else {
       res = await bloc.addToDo(toDo, userBloc.state.id);
     }

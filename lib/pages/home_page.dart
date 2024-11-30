@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
         ],
         title: const Text("Home"),
       ),
-
+    
       floatingActionButton: FloatingActionButton(
         elevation: 3,
         onPressed: (){
@@ -47,15 +47,21 @@ class HomePage extends StatelessWidget {
   }
   
   Widget _showToDosOrEmpty(ToDoBloc toDoBloc, TagsBloc tagsBloc) {
-    if (toDoBloc.state.getToDos.isNotEmpty) return _showToDos();
+    if (toDoBloc.state.getToDos.isNotEmpty) return _showToDos(toDoBloc, tagsBloc);
     return _showEmptyPage();
   }
 
-  Widget _showToDos() {
-    return const SingleChildScrollView(
+  Widget _showToDos(ToDoBloc toDoBloc, TagsBloc tagsBloc) {
+    return SingleChildScrollView(
       child: Column(
         children: [
-          ToDosGrid()
+          const ToDosGrid(),
+
+          for (final entry in toDoBloc.getToDos.entries)
+            if (entry.key != 0)
+              if (entry.value.isNotEmpty)
+                if (tagsBloc.getTags.containsKey(entry.key))
+                  ToDoList(tag: tagsBloc.getTags[entry.key]!, toDos: entry.value,)
         ],
       ),
     );

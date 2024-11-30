@@ -50,7 +50,14 @@ class SettingsPage extends StatelessWidget {
               icon: Icons.assignment_late_rounded,
               onTap: () async {
                 final id = context.read<UserBloc>().state.id;
-                await context.read<ToDoBloc>().clearData(id);
+                NailUtils.showLoading(context);
+                final res = await context.read<ToDoBloc>().clearData(id);
+                if (res["ok"]) {
+                  Navigator.of(context).pop();
+                } else {
+                  Navigator.of(context).pop();
+                  NailUtils.showError(context, res["error"]);
+                }
               }
             ),
 
@@ -103,6 +110,8 @@ class SettingsPage extends StatelessWidget {
   void _logOut(BuildContext context) async {
     context.read<UserBloc>().clearData();
     context.read<CurrentPageBloc>().setCurrentPage(0);
+    context.read<ToDoBloc>().emptyToDos();
+    context.read<TagsBloc>().emptyTags();
     _pushTo(context, "login");
   }
 

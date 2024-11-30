@@ -29,7 +29,7 @@ class CustomLabeledTextbutton extends StatelessWidget {
               fontWeight: FontWeight.bold
             ),
           )
-        )
+        ),
       ],
     );
   }

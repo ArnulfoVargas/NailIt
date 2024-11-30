@@ -45,8 +45,10 @@ class _LoadingPageState extends State<LoadingPage> {
           _goLogin();
         } else {
           final tagsBloc = _getTagsBloc();
+          final todosBloc = _getTodosBloc();
 
           await tagsBloc.loadData(state.id);
+          await todosBloc.loadData(state.id);
 
           _goHome();
         }
@@ -56,6 +58,10 @@ class _LoadingPageState extends State<LoadingPage> {
 
   TagsBloc _getTagsBloc() {
     return context.read<TagsBloc>();
+  }
+
+  ToDoBloc _getTodosBloc() {
+    return context.read<ToDoBloc>();
   }
 
   _goHome() {

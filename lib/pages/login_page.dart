@@ -127,6 +127,10 @@ class _LoginPageState extends State<LoginPage> {
     final result = await context.read<UserBloc>().loginUser(mail: mailController.text, password: passController.text);
 
     if (result["ok"]) {
+      _loading();
+      await _getTagsBloc().loadData(result["id"]);
+      await _getTodosBloc().loadData(result["id"]);
+      _doPop();
       _navigateToHome();
     } else {
       isValidating = false;
@@ -134,6 +138,23 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {});
     }
   }
+
+  _loading() {
+    NailUtils.showLoading(context);
+  }
+
+  _doPop() {
+    Navigator.of(context).pop();
+  }
+
+  TagsBloc _getTagsBloc() {
+    return context.read<TagsBloc>();
+  }
+
+  ToDoBloc _getTodosBloc() {
+    return context.read<ToDoBloc>();
+  }
+
 
   _navigateToHome() {
     context.read<CurrentPageBloc>().setCurrentPage(0);

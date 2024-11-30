@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tarea/blocs/blocs.dart';
 import 'package:tarea/models/models.dart';
 import 'package:tarea/utils/utils.dart';
@@ -111,7 +110,7 @@ class ToDo extends StatelessWidget {
 
   void _showDescription(BuildContext context) {
     final date = toDoModel.deadLine;
-    final dateFormated = "${NailUtils.months[date.month]} ${date.day}, ${date.year}";
+    final dateFormated = "${NailUtils.months[date.month - 1]} ${date.day}, ${date.year}";
     final containsKey = tagsBloc.getTags.containsKey(toDoModel.tag);
 
     TagModel? tag = const TagModel(title: "", color: Colors.white);

@@ -62,6 +62,10 @@ class TagsModel {
     _tags = tags ?? <int, TagModel>{};
   }
 
+  TagsModel emptyTags() {
+    return TagsModel(tags: {});
+  }
+
   Future<Map<String, dynamic>> removeTag(int idTag, int idUser, TagModel t) async {
     try {
       final uri = Uri.https(NailUtils.baseRoute, "tags/delete/$idTag");

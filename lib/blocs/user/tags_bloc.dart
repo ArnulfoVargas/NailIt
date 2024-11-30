@@ -7,6 +7,10 @@ class TagsBloc extends Cubit<TagsModel> {
 
   Map<int, TagModel> get getTags => state.getTags;
 
+  void emptyTags() {
+    emit(state.emptyTags());
+  }
+
   Future<Map<String, dynamic>> loadData(int idUser) async {
     final res = await state.loadData(idUser);
     final ok = res["ok"];

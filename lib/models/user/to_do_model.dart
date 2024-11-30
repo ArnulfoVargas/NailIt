@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tarea/models/models.dart';
 import 'package:tarea/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
@@ -48,9 +47,13 @@ class ToDoModel {
   ToDoModel.fromJson(Map<String, dynamic> json) : 
     title = json["title"], 
     deadLine = DateTime.parse(json["deadline"]),
-    description = json["description"],
+    description = json["description"] == "" ? null : json["description"] ,
     toDoColor = Color(json["color"] as int),
     tag = json["tag"] as int;
+
+  String toString() {
+    return "id: $id title: $title description: $description tag: $tag deadline: ${deadLine.toString()} color: ${toDoColor.value}";
+  }
 }
 
 class ToDosModel {
@@ -61,7 +64,11 @@ class ToDosModel {
     _todos = todos ?? <int, Map<int,ToDoModel>>{};
   }
 
-  Future<Map<String, dynamic>> editToDo(int id, int userId, ToDoModel toDo) async {
+  ToDosModel emptyToDos() {
+    return ToDosModel(todos: {});
+  }
+
+  Future<Map<String, dynamic>> editToDo(int id, int userId, int prevTag,ToDoModel toDo) async {
     try{
       final uri = Uri.https(NailUtils.baseRoute, "todos/update/$id");
       final res = await http.put(uri, body: jsonEncode(
@@ -78,9 +85,13 @@ class ToDosModel {
       final data = jsonDecode(res.body);
       final body = data["body"];
 
+      toDo.tag = prevTag;
+
       if (res.statusCode == 200) {
         ToDoModel newTodo = ToDoModel.fromJson(body);
+        toDo.id = id;
         newTodo.id = id;
+
         _updateToDosMap(toDo, newTodo: newTodo);
 
         return {
@@ -92,7 +103,7 @@ class ToDosModel {
 
       return {
         "ok" : false,
-        "error" : "cannot create"
+        "error" : "cannot edit"
       };
     } catch(e) {
       return {
@@ -169,6 +180,59 @@ class ToDosModel {
 
       return {
         "ok" : false,
+        "error" : "cannot remove"
+      };
+    } catch(e) {
+      return {
+        "ok" : false,
+        "error" : "unexpected error"
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> clearData(int userId) async {
+    try{
+      final uri = Uri.https(NailUtils.baseRoute, "todos/delete/user/$userId");
+      final res = await http.delete(uri).timeout(const Duration(seconds: 5));
+
+      if (res.statusCode == 200) {
+        return {
+          "state" : ToDosModel(todos: {}),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+
+      return {
+        "ok" : false,
+        "error" : "cannot remove"
+      };
+    } catch(e) {
+      return {
+        "ok" : false,
+        "error" : "unexpected error"
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> loadData(int userId) async {
+    try{
+      final uri = Uri.https(NailUtils.baseRoute, "todos/user/$userId");
+      final res = await http.get(uri).timeout(const Duration(seconds: 5));
+      final data = jsonDecode(res.body);
+      final body = data["body"];
+
+      _fillToDosMap(body);
+
+      if (res.statusCode == 200) {
+        return {
+          "state" : ToDosModel(todos: _todos),
+          "ok" : true,
+          "error" : ""
+        };
+      }
+      return {
+        "ok" : false,
         "error" : "cannot create"
       };
     } catch(e) {
@@ -179,24 +243,16 @@ class ToDosModel {
     }
   }
 
-  Future<void> saveData() async {
-    final data = jsonEncode(_todos);
-    SharedPreferences sh = await SharedPreferences.getInstance();
-    sh.setString("todos", data);
-  }
+  _fillToDosMap(dynamic json) {
+    final jsonData = json as List;
 
-  Future<ToDosModel> clearData() async {
+    for (final t in jsonData) {
+      final todoJson = t as Map<String, dynamic>;
+      ToDoModel todo = ToDoModel.fromJson(todoJson);
+      todo.id = todoJson["id"];
 
-
-    return ToDosModel();
-  }
-
-  Future<ToDosModel> loadData() async {
-    // SharedPreferences sh = await SharedPreferences.getInstance();
-    // final jsonString = sh.getString("todos");
-    // if (jsonString == null) return ToDosModel();
-    // final json = jsonDecode(jsonString);
-    return ToDosModel();
+      _updateToDosMap(todo);
+    }
   }
 
   _updateToDosMap(ToDoModel oldTodo, {bool delete = false, ToDoModel? newTodo}) {
@@ -220,7 +276,11 @@ class ToDosModel {
         if (!_todos.containsKey(newTodoTag)) {
           _todos[newTodoTag] = <int, ToDoModel>{};
         }
+        if (!_todos.containsKey(oldTodoTag)) {
+          _todos[oldTodoTag] = <int, ToDoModel>{};
+        }
 
+        _todos[oldTodoTag]!.remove(oldTodoId);
         _todos[0]![newTodoId] = newTodo;
         _todos[newTodoTag]![newTodoId] = newTodo;
       } else {
